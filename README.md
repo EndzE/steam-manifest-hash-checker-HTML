@@ -4,7 +4,7 @@
 The Steam Manifest Hash Checker is a web-based tool designed to verify the integrity of Steam game files against their manifest data. This standalone application allows users to validate their game files by comparing their SHA-1 hashes with the expected values from a Steam manifest file.
 
 ## Acknowledgments
-Thanks to XPaw's SteamKit2 code, which was used as a reference for the manifest file decoding. Without this reference implementation, parsing the Steam manifest format would have been much more challenging.
+Thanks to SteamKit2 code, which was used as a reference for the manifest file decoding. Without this reference implementation, parsing the Steam manifest format would have been much more challenging.
 
 Thanks to anadius for recommending hash-wasm - this suggestion significantly improved the tool's performance over the original implementation.
 
