@@ -69,7 +69,6 @@ This tool operates entirely in your browser with no external connections except 
 ## Limitations
 - Requires modern browser capabilities
 - Processing speed depends on local hardware performance
-- Large files may require significant memory resources
 
 ## Browser Compatibility
 Tested and supported on:
@@ -85,15 +84,6 @@ The application uses several key components:
 - Streaming file processing
 - Web Workers for background processing
 - CSS Grid and Flexbox for responsive layout
-
-## Future Improvements
-Potential areas for enhancement include:
-
-- Offline support with bundled dependencies
-- Multiple manifest comparison
-- Detailed file metadata display
-- Batch processing capabilities
-- Export functionality for verification results
 
 ## License
 This tool is provided as-is for personal use. Please verify licensing requirements for commercial applications.
