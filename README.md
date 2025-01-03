@@ -29,9 +29,16 @@ The application provides a modern, efficient interface for file verification wit
 - Real-time hash verification with progress tracking
 - Processing speed monitoring in MB/s
 - File search functionality
-- Folder structure recognition
+- Intelligent folder structure management
+- Automatic missing file detection
+- Complete file path display in mismatch reports
 - Dark mode support with a metallic blue theme
 - Memory-efficient processing of large files
+
+### Recent Feature Additions
+- **Missing File Detection**: Automatically identifies and marks files as "Missing" when they're listed in the manifest but not found in the provided directory
+- **Folder Structure Optimization**: Removes redundant folder entries while preserving file listings for cleaner navigation
+- **Enhanced Path Display**: Shows complete file paths in the mismatches list for easier file location and verification
 
 ## Technical Implementation
 The application uses several modern web technologies and approaches:
@@ -41,6 +48,8 @@ The application uses several modern web technologies and approaches:
 - Asynchronous file handling
 - WebAssembly for optimal hash calculation performance
 - Protobuf parsing for Steam manifest files
+- Intelligent file path tracking and management
+- Advanced file status handling system
 
 ## Usage Instructions
 
@@ -49,7 +58,8 @@ The application uses several modern web technologies and approaches:
 3. Drop the files you want to verify into the second drop zone
 4. Monitor the verification progress through the progress bar
 5. Use the search function to locate specific files
-6. View results showing matched, mismatched, and folder entries
+6. View results showing matched, mismatched, missing, and folder entries
+7. Check the mismatches list for complete file paths of any problematic files
 
 ## Requirements
 - Modern web browser with JavaScript enabled
@@ -62,6 +72,7 @@ The tool is optimized for handling large game directories efficiently:
 - Files are processed in 8MB chunks to manage memory usage
 - Progress updates are throttled to maintain UI responsiveness
 - Hash computation is performed using WebAssembly for optimal performance
+- Intelligent folder structure management reduces memory overhead
 
 ## Security
 This tool operates entirely in your browser with no external connections except for loading the hash-wasm library. No data is transmitted to any servers, and all file processing occurs locally.
@@ -84,6 +95,8 @@ The application uses several key components:
 - Streaming file processing
 - Web Workers for background processing
 - CSS Grid and Flexbox for responsive layout
+- Advanced file path management system
+- Intelligent file status tracking
 
 ## License
 This tool is provided as-is for personal use. Please verify licensing requirements for commercial applications.
