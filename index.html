@@ -37,9 +37,11 @@
 			}
 
 			.container {
-				max-width: 1200px;
+				max-width: 1920px;
 				margin: 0 auto;
 				padding: 0 2rem;
+				display: flex;
+				flex-direction: column;
 			}
 
 			.header {
@@ -110,7 +112,8 @@
 				transform: translateY(-2px);
 			}
 
-			.section {
+			.section,
+			#mismatches {
 				background: var(--metallic);
 				border: 1px solid var(--border);
 				border-radius: var(--radius);
@@ -119,7 +122,8 @@
 				box-shadow: var(--shadow);
 			}
 
-			.section h2 {
+			.section h2,
+			#mismatches h2 {
 				color: var(--primary-light);
 				margin: 0 0 1.5rem;
 				font-size: 1.25rem;
@@ -127,6 +131,18 @@
 				display: flex;
 				align-items: center;
 				gap: 0.5rem;
+			}
+
+			#mismatches h2 {
+				color: var(--error);
+			}
+
+			#mismatches {
+				order: 2;
+			}
+
+			#files {
+				order: 3;
 			}
 
 			.progress-container {
@@ -174,7 +190,7 @@
 			}
 
 			.table-container {
-				overflow: auto;
+				overflow-x: auto;
 				border: 1px solid var(--border);
 				border-radius: 8px;
 				background: rgba(42, 50, 66, 0.5);
@@ -184,7 +200,7 @@
 				width: 100%;
 				border-collapse: separate;
 				border-spacing: 0;
-				table-layout: fixed;
+				table-layout: auto;
 			}
 
 			th {
@@ -206,8 +222,6 @@
 				padding: 0.75rem 1rem;
 				border-bottom: 1px solid var(--border);
 				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
 			}
 
 			tr:hover td {
@@ -272,6 +286,7 @@
 			}
 
 			.file-hash {
+				white-space: nowrap;
 				font-family: 'Roboto Mono', monospace;
 				font-size: 0.9em;
 				color: var(--accent);
@@ -354,6 +369,24 @@
 					</tr>
 				</table>
 			</div>
+			<div id="mismatches" class="section hidden">
+				<h2>
+					<span class="material-icons" style="color: var(--error);">warning</span>Mismatched Files
+				</h2>
+				<div class="table-container">
+					<table>
+						<thead>
+							<tr>
+								<th style="width: 40%">Filename</th>
+								<th style="width: 10%">Size</th>
+								<th style="width: 25%">Expected Hash</th>
+								<th style="width: 25%">Actual Hash</th>
+							</tr>
+						</thead>
+						<tbody id="mismatch-list"></tbody>
+					</table>
+				</div>
+			</div>
 			<div id="files" class="section hidden">
 				<h2>
 					<span class="material-icons">folder</span>Files
@@ -366,10 +399,10 @@
 					<table>
 						<thead>
 							<tr>
-								<th>Filename</th>
-								<th>Size</th>
-								<th>Hash</th>
-								<th>Status</th>
+								<th style="width: 40%">Filename</th>
+								<th style="width: 10%">Size</th>
+								<th style="width: 25%">Hash</th>
+								<th style="width: 25%">Status</th>
 							</tr>
 						</thead>
 						<tbody id="file-list"></tbody>
@@ -428,12 +461,14 @@
 					const error = document.getElementById('error');
 					error.innerHTML = `
                     
+										
 										<span class="material-icons">error</span>
 										<span class="error-message">${message}</span>
                 `;
 					error.classList.remove('hidden');
 					document.getElementById('metadata').classList.add('hidden');
 					document.getElementById('files').classList.add('hidden');
+					document.getElementById('mismatches').classList.add('hidden');
 				},
 				hideError() {
 					document.getElementById('error').classList.add('hidden');
@@ -447,6 +482,7 @@
 					};
 					element.innerHTML = `
                     
+										
 										<span class="material-icons">${icons[status]}</span>
                     ${status}
                 `;
@@ -459,6 +495,7 @@
 				progressContainer.className = 'progress-container';
 				progressContainer.innerHTML = `
                 
+										
 										<div class="progress-bar">
 											<div class="progress-fill"></div>
 										</div>
@@ -466,10 +503,13 @@
 											<div class="progress-text">
 												<span class="material-icons">task_alt</span>
 												<span>Matched: 
+													
 													<span id="matched-count">0</span>/
+													
 													<span id="total-checkable">0</span>
 												</span>
 												<span class="speed-info">Speed: 
+													
 													<span id="hash-speed">0 MB/s</span>
 												</span>
 											</div>
@@ -486,7 +526,6 @@
 				progressBar.querySelector('#total-checkable').textContent = stats.total;
 				progressBar.querySelector('#hash-speed').textContent = stats.speed;
 			}
-			let uploadedManifest; // This will hold the uploaded manifest data
 			async function handleManfiestFile(file) {
 				const reader = new FileReader();
 				reader.onload = async (e) => {
@@ -522,16 +561,15 @@
 						sha1.init();
 						let chunkOffset = 0;
 						while (chunkOffset < file.size) {
-							const chunkSize = Math.min(8 * 1024 * 1024, file.size - chunkOffset); // adjust chunk size for last chunk
+							const chunkSize = Math.min(8 * 1024 * 1024, file.size - chunkOffset);
 							const chunk = await readChunk(file, chunkOffset, chunkSize);
 							sha1.update(new Uint8Array(chunk));
 							processedBytes += chunkSize;
 							chunkOffset += chunkSize;
 							const elapsed = (Date.now() - startTime) / 1000;
 							const speed = processedBytes / elapsed;
-							// update file status and progress bar within the loop for each chunk
 							if (chunkOffset === file.size) {
-								updateFileStatuses(sha1.digest());
+								updateFileStatuses(sha1.digest(), file.name);
 							}
 							updateProgressDisplay(progressBar, {
 								matches: document.querySelectorAll('#file-list tr .status.match').length,
@@ -551,21 +589,34 @@
 				}
 			}
 
-			function updateFileStatuses(hash) {
-				const manifestHashes = window.currentManifest.Files.map(f => typeof f.FileHash === 'string' ? f.FileHash : utils.formatHash(f.FileHash));
-				const matchStatus = manifestHashes.includes(hash) ? 'match' : 'mismatch';
+			function updateFileStatuses(hash, fileName) {
+				const manifestFile = window.currentManifest.Files.find(f => f.FileName === fileName);
+				if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
+				const expectedHash = utils.formatHash(manifestFile.FileHash);
+				const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
+				const matchStatus = expectedHash === actualHash ? 'match' : 'mismatch';
+				// Update main file list
 				document.querySelectorAll('#file-list tr').forEach(row => {
-					const hashCell = row.querySelector('.file-hash');
-					if (hashCell && hashCell.textContent === hash) {
+					if (row.children[0].textContent === fileName) {
 						utils.updateStatus(row.querySelector('.status'), matchStatus);
-					} else if (hashCell) {
-						// If the hash is not found in the manifest, check if it's pending and change to mismatch
-						const statusElement = row.querySelector('.status');
-						if (statusElement.classList.contains('pending')) {
-							utils.updateStatus(statusElement, 'mismatch');
+						// Add to mismatches if needed
+						if (matchStatus === 'mismatch') {
+							const mismatchList = document.getElementById('mismatch-list');
+							const mismatchRow = document.createElement('tr');
+							mismatchRow.innerHTML = `
+                            
+										
+										<td>${fileName}</td>
+										<td>${row.children[1].textContent}</td>
+										<td class="file-hash">${expectedHash}</td>
+										<td class="file-hash">${actualHash}</td>
+                        `;
+							mismatchList.appendChild(mismatchRow);
+							document.getElementById('mismatches').classList.remove('hidden');
 						}
 					}
 				});
+				// Update overall status
 				const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
 				const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length;
 				const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
@@ -692,41 +743,13 @@
 					}
 				}
 			}
-			async function validateFiles(files) {
-				if (!uploadedManifest || !files.length) return;
-				for (const file of files) {
-					const reader = new FileReader();
-					reader.onload = async (e) => {
-						try {
-							const hash = await calculateFileHash(e.target.result); // Implement this function to calculate the hash
-							updateFileStatuses(hash, file.name); // Modify this function to accept a filename parameter and update the corresponding row in the UI
-						} catch (err) {
-							console.error('Error:', err);
-							utils.showError(`Failed to validate ${file.name}`);
-						}
-					};
-					reader.readAsArrayBuffer(file);
-				}
-			}
-			async function handleFiles(files) {
-				if (!files.length) return;
-				const reader = new FileReader();
-				reader.onload = async (e) => {
-					try {
-						utils.hideError();
-						const manifest = await Manifest.fromBuffer(e.target.result);
-						displayManifest(manifest);
-					} catch (err) {
-						console.error('Error:', err);
-						utils.showError('Invalid manifest file');
-					}
-				};
-				reader.readAsArrayBuffer(files[0]);
-			}
 
 			function displayManifest(manifest) {
 				try {
 					window.currentManifest = manifest;
+					// Clear previous mismatches
+					document.getElementById('mismatch-list').innerHTML = '';
+					document.getElementById('mismatches').classList.add('hidden');
 					document.getElementById('depot-id').textContent = manifest.DepotID;
 					document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
 					document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
@@ -737,6 +760,7 @@
 						const isFolder = utils.isFolder(file.FileHash);
 						row.innerHTML = `
                         
+										
 										<td>${file.FileName}</td>
 										<td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
 										<td class="file-hash">${isFolder ? 'Folder' : utils.formatHash(file.FileHash)}</td>
@@ -744,6 +768,7 @@
 											<span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
                             ${isFolder ? 'Folder' : 'pending'}
                         
+										
 										</td>
                     `;
 						fileList.appendChild(row);
@@ -762,9 +787,14 @@
 			}
 
 			function initializeUI() {
+				document.getElementById('file-input').addEventListener('change', (e) => {
+					if (e.target.files[0]) handleManfiestFile(e.target.files[0]);
+				});
+				document.getElementById('dir-input').addEventListener('change', (e) => {
+					if (e.target.files.length) handleDirectory(Array.from(e.target.files));
+				});
 				['drop-zone', 'dir-zone'].forEach(id => {
 					const element = document.getElementById(id);
-					const input = document.getElementById(id === 'drop-zone' ? 'file-input' : 'dir-input');
 					element.addEventListener('dragover', (e) => {
 						e.preventDefault();
 						element.classList.add('drag-over');
@@ -772,21 +802,20 @@
 					element.addEventListener('dragleave', () => {
 						element.classList.remove('drag-over');
 					});
-					element.addEventListener('click', () => input.click());
-					input.addEventListener('change', (e) => {
-						if (id === 'drop-zone') handleFiles(e.target.files);
-						else handleDirectory(e.target.files);
+					element.addEventListener('drop', (e) => {
+						e.preventDefault();
+						element.classList.remove('drag-over');
+						if (id === 'drop-zone' && e.dataTransfer.files[0]) {
+							handleManfiestFile(e.dataTransfer.files[0]);
+						} else if (id === 'dir-zone' && e.dataTransfer.files.length) {
+							handleDirectory(Array.from(e.dataTransfer.files));
+						}
 					});
 				});
 				document.getElementById('search').addEventListener('input', (e) => {
 					const term = e.target.value.toLowerCase();
 					document.querySelectorAll('#file-list tr').forEach(row => {
 						row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-						if (id === 'drop-zone') {
-							input.addEventListener('change', (e) => handleManfiestFile(e.target.files[0]));
-						} else {
-							input.addEventListener('change', (e) => validateFiles(Array.from(e.target.files)));
-						}
 					});
 				});
 			}
