@@ -457,14 +457,42 @@
 				isFolder(hash) {
 					return typeof hash === 'string' ? hash === '0000000000000000000000000000000000000000' : this.formatHash(hash) === '0000000000000000000000000000000000000000';
 				},
+				isNonEmptyFolder(file, allFiles) {
+					if (!this.isFolder(file.FileHash)) return false;
+					return allFiles.some(f => f.FileName.startsWith(file.FileName + '/'));
+				},
+				markPendingAsMissing() {
+					document.querySelectorAll('#file-list tr .status.pending').forEach(status => {
+						utils.updateStatus(status, 'mismatch');
+						// Get the row data
+						const row = status.parentElement;
+						const fileName = row.children[0].textContent;
+						const fileSize = row.children[1].textContent;
+						const expectedHash = row.children[2].textContent;
+						// Add to mismatches list
+						const mismatchList = document.getElementById('mismatch-list');
+						const mismatchRow = document.createElement('tr');
+						mismatchRow.innerHTML = `
+              
+										<td>${fileName}</td>
+										<td>${fileSize}</td>
+										<td class="file-hash">${expectedHash}</td>
+										<td class="file-hash">File Missing</td>
+            `;
+						mismatchList.appendChild(mismatchRow);
+					});
+					// Show mismatches section if there are any mismatches
+					if (document.getElementById('mismatch-list').children.length > 0) {
+						document.getElementById('mismatches').classList.remove('hidden');
+					}
+				},
 				showError(message) {
 					const error = document.getElementById('error');
 					error.innerHTML = `
-                    
-										
+            
 										<span class="material-icons">error</span>
 										<span class="error-message">${message}</span>
-                `;
+          `;
 					error.classList.remove('hidden');
 					document.getElementById('metadata').classList.add('hidden');
 					document.getElementById('files').classList.add('hidden');
@@ -481,11 +509,10 @@
 						folder: 'folder'
 					};
 					element.innerHTML = `
-                    
-										
+            
 										<span class="material-icons">${icons[status]}</span>
-                    ${status}
-                `;
+            ${status}
+          `;
 					element.className = `status ${status}`;
 				}
 			};
@@ -494,8 +521,7 @@
 				const progressContainer = document.createElement('div');
 				progressContainer.className = 'progress-container';
 				progressContainer.innerHTML = `
-                
-										
+          
 										<div class="progress-bar">
 											<div class="progress-fill"></div>
 										</div>
@@ -503,18 +529,18 @@
 											<div class="progress-text">
 												<span class="material-icons">task_alt</span>
 												<span>Matched: 
-													
+                
 													<span id="matched-count">0</span>/
-													
+                
 													<span id="total-checkable">0</span>
 												</span>
 												<span class="speed-info">Speed: 
-													
+                
 													<span id="hash-speed">0 MB/s</span>
 												</span>
 											</div>
 										</div>
-            `;
+        `;
 				document.querySelector('.container').insertBefore(progressContainer, document.getElementById('files'));
 				return progressContainer;
 			}
@@ -525,20 +551,6 @@
 				progressBar.querySelector('#matched-count').textContent = stats.matches;
 				progressBar.querySelector('#total-checkable').textContent = stats.total;
 				progressBar.querySelector('#hash-speed').textContent = stats.speed;
-			}
-			async function handleManfiestFile(file) {
-				const reader = new FileReader();
-				reader.onload = async (e) => {
-					try {
-						utils.hideError();
-						uploadedManifest = await Manifest.fromBuffer(e.target.result);
-						displayManifest(uploadedManifest);
-					} catch (err) {
-						console.error('Error:', err);
-						utils.showError('Invalid manifest file');
-					}
-				};
-				reader.readAsArrayBuffer(file);
 			}
 			async function handleDirectory(files) {
 				if (!files.length || !window.currentManifest) {
@@ -581,55 +593,14 @@
 				} catch (error) {
 					utils.showError(error.message);
 				} finally {
+					// Mark remaining pending files as missing
+					utils.markPendingAsMissing();
 					const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length;
 					const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
 					if (completedFiles === totalCheckableFiles) {
 						progressBar.remove();
 					}
 				}
-			}
-
-			function updateFileStatuses(hash, fileName) {
-				const manifestFile = window.currentManifest.Files.find(f => f.FileName === fileName);
-				if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
-				const expectedHash = utils.formatHash(manifestFile.FileHash);
-				const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
-				const matchStatus = expectedHash === actualHash ? 'match' : 'mismatch';
-				// Update main file list
-				document.querySelectorAll('#file-list tr').forEach(row => {
-					if (row.children[0].textContent === fileName) {
-						utils.updateStatus(row.querySelector('.status'), matchStatus);
-						// Add to mismatches if needed
-						if (matchStatus === 'mismatch') {
-							const mismatchList = document.getElementById('mismatch-list');
-							const mismatchRow = document.createElement('tr');
-							mismatchRow.innerHTML = `
-                            
-										
-										<td>${fileName}</td>
-										<td>${row.children[1].textContent}</td>
-										<td class="file-hash">${expectedHash}</td>
-										<td class="file-hash">${actualHash}</td>
-                        `;
-							mismatchList.appendChild(mismatchRow);
-							document.getElementById('mismatches').classList.remove('hidden');
-						}
-					}
-				});
-				// Update overall status
-				const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
-				const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length;
-				const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
-				let statusType = 'pending';
-				if (completedFiles > 0) {
-					if (completedFiles === totalCheckableFiles) {
-						statusType = 'match';
-					} else if (mismatchedFiles > 0) {
-						statusType = 'mismatch';
-					}
-				}
-				const completionStatus = document.getElementById('completion-status');
-				utils.updateStatus(completionStatus, statusType);
 			}
 			class Manifest {
 				static PAYLOAD_MAGIC = 0x71F617D0;
@@ -753,27 +724,27 @@
 					document.getElementById('depot-id').textContent = manifest.DepotID;
 					document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
 					document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+					// Filter out non-empty folders
+					const filteredFiles = manifest.Files.filter(file => !utils.isNonEmptyFolder(file, manifest.Files));
 					const fileList = document.getElementById('file-list');
 					fileList.innerHTML = '';
-					manifest.Files.forEach(file => {
+					filteredFiles.forEach(file => {
 						const row = document.createElement('tr');
 						const isFolder = utils.isFolder(file.FileHash);
 						row.innerHTML = `
-                        
-										
+              
 										<td>${file.FileName}</td>
 										<td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
 										<td class="file-hash">${isFolder ? 'Folder' : utils.formatHash(file.FileHash)}</td>
 										<td class="status ${isFolder ? 'folder' : 'pending'}">
 											<span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
-                            ${isFolder ? 'Folder' : 'pending'}
-                        
-										
+                ${isFolder ? 'Folder' : 'pending'}
+              
 										</td>
-                    `;
+            `;
 						fileList.appendChild(row);
 					});
-					const nonFolderFiles = manifest.Files.filter(file => !utils.isFolder(file.FileHash));
+					const nonFolderFiles = filteredFiles.filter(file => !utils.isFolder(file.FileHash));
 					document.getElementById('total-files').textContent = nonFolderFiles.length;
 					document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum, file) => sum + Number(file.TotalSize), 0));
 					utils.updateStatus(document.getElementById('completion-status'), 'pending');
@@ -784,6 +755,64 @@
 					console.error('Error:', err);
 					utils.showError(err.message);
 				}
+			}
+
+			function updateFileStatuses(hash, fileName) {
+				const manifestFile = window.currentManifest.Files.find(f => f.FileName === fileName);
+				if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
+				const expectedHash = utils.formatHash(manifestFile.FileHash);
+				const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
+				const matchStatus = expectedHash === actualHash ? 'match' : 'mismatch';
+				// Update main file list
+				document.querySelectorAll('#file-list tr').forEach(row => {
+					if (row.children[0].textContent === fileName) {
+						utils.updateStatus(row.querySelector('.status'), matchStatus);
+						// Add to mismatches if needed
+						if (matchStatus === 'mismatch') {
+							const mismatchList = document.getElementById('mismatch-list');
+							const mismatchRow = document.createElement('tr');
+							const fullPath = window.currentManifest.Files.find(f => f.FileName === fileName)?.FileName || fileName;
+							mismatchRow.innerHTML = `
+                
+										<td>${fullPath}</td>
+										<td>${row.children[1].textContent}</td>
+										<td class="file-hash">${expectedHash}</td>
+										<td class="file-hash">${actualHash}</td>
+              `;
+							mismatchList.appendChild(mismatchRow);
+							document.getElementById('mismatches').classList.remove('hidden');
+						}
+					}
+				});
+				// Update overall status
+				const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
+				const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length;
+				const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
+				let statusType = 'pending';
+				if (completedFiles > 0) {
+					if (completedFiles === totalCheckableFiles) {
+						statusType = 'match';
+					} else if (mismatchedFiles > 0) {
+						statusType = 'mismatch';
+					}
+				}
+				const completionStatus = document.getElementById('completion-status');
+				utils.updateStatus(completionStatus, statusType);
+			}
+
+			function handleManfiestFile(file) {
+				const reader = new FileReader();
+				reader.onload = async (e) => {
+					try {
+						utils.hideError();
+						uploadedManifest = await Manifest.fromBuffer(e.target.result);
+						displayManifest(uploadedManifest);
+					} catch (err) {
+						console.error('Error:', err);
+						utils.showError('Invalid manifest file');
+					}
+				};
+				reader.readAsArrayBuffer(file);
 			}
 
 			function initializeUI() {
