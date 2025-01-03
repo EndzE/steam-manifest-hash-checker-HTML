@@ -6,9 +6,9 @@
     <title>Steam Manifest Hash Checker</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4.11.0/dist/sha1.umd.min.js"></script>
     <style>
         :root {
-            color-scheme: light dark;
             --bg: #1a1f2e;
             --text: #e0e6f2;
             --border: #2a3242;
@@ -22,24 +22,30 @@
             --success: #4caf50;
             --error: #f44336;
             --warning: #ff9800;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
 
-        /* Base styles */
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            margin: 0;
             min-height: 100vh;
         }
 
-        /* Header */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
         .header {
             background: var(--metallic);
             padding: 1.5rem 2rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
@@ -58,14 +64,6 @@
             font-size: 2rem;
         }
 
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-        }
-
-        /* Dropzone container */
         .dropzones {
             display: flex;
             gap: 1rem;
@@ -75,13 +73,13 @@
         .dropzone {
             flex: 1;
             border: 2px dashed var(--primary);
-            border-radius: 12px;
+            border-radius: var(--radius);
             padding: 2rem;
             text-align: center;
             cursor: pointer;
             background: var(--metallic);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -99,14 +97,13 @@
             transform: translateY(-2px);
         }
 
-        /* Section styles */
         .section {
             background: var(--metallic);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: var(--radius);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .section h2 {
@@ -119,12 +116,11 @@
             gap: 0.5rem;
         }
 
-        /* Progress tracking */
         .progress-container {
             margin: 1.5rem 0;
             background: var(--metallic);
             padding: 1.5rem;
-            border-radius: 12px;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
         }
 
@@ -145,43 +141,25 @@
         }
 
         .progress-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
         }
 
         .progress-text {
-            font-size: 0.9rem;
-            color: var(--text);
-            text-align: center;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .progress-details {
-            font-size: 0.875rem;
-            color: var(--accent);
-            text-align: center;
-            display: flex;
             justify-content: center;
             gap: 1rem;
-            flex-wrap: wrap;
         }
 
-        .progress-details span {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            white-space: nowrap;
-        }
-
-        .progress-details .material-icons {
+        .progress-text .material-icons {
             font-size: 1rem;
         }
 
-        /* Table styles */
+        .speed-info {
+            color: var(--accent);
+        }
+
         .table-container {
             overflow: auto;
             border: 1px solid var(--border);
@@ -223,53 +201,41 @@
             background: var(--hover);
         }
 
-        /* Search input */
-		.search-container {
-			margin-bottom: 1rem;
-			position: relative;
-			padding: 0.5rem;
-			background: var(--metallic);
-			border-radius: 8px;
-			border: 1px solid var(--border);
-		}
-		
-		.search {
-			width: 100%;
-			padding: 0.75rem 1rem 0.75rem 2.5rem;
-			border: 1px solid var(--border);
-			border-radius: 8px;
-			background: rgba(42, 50, 66, 0.5);
-			color: var(--text);
-			font-size: 0.9rem;
-			transition: all 0.3s ease;
-			box-sizing: border-box;
-		}
-		
-		.search-icon {
-			position: absolute;
-			left: 1.25rem;
-			top: 50%;
-			transform: translateY(-50%);
-			color: var(--accent);
-			font-size: 1.25rem;
-			pointer-events: none;
-		}
-
-        .search:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(74, 116, 201, 0.2);
+        .search-container {
+            margin-bottom: 1rem;
+            position: relative;
+            padding: 0.5rem;
+            background: var(--metallic);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
         }
 
-        /* Status indicators */
+        .search {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(42, 50, 66, 0.5);
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: var(--transition);
+            box-sizing: border-box;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1.25rem;
+            pointer-events: none;
+        }
+
         .status {
             display: inline-flex;
             align-items: center;
             gap: 0.25rem;
-        }
-
-        .status .material-icons {
-            font-size: 1rem;
         }
 
         .match { color: var(--success); }
@@ -277,7 +243,6 @@
         .pending { color: var(--warning); }
         .folder { color: var(--accent); }
 
-        /* Utility classes */
         .hidden { display: none !important; }
 
         .file-hash {
@@ -298,27 +263,10 @@
             gap: 0.5rem;
         }
 
-        /* Column resizer */
-        .resizer {
-            position: absolute;
-            right: -3px;
-            top: 0;
-            height: 100%;
-            width: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            cursor: col-resize;
-            z-index: 1000;
-            transition: background 0.3s ease;
-        }
-
-        .resizer:hover { background: var(--primary); }
-
-        /* Responsive design */
         @media (max-width: 768px) {
             .container { padding: 0 1rem; }
             .dropzones { flex-direction: column; }
             .dropzone { padding: 1.5rem; }
-            .progress-details { flex-direction: column; }
         }
     </style>
 </head>
@@ -354,7 +302,6 @@
                 <tr><td>Manifest ID:</td><td id="manifest-gid"></td></tr>
                 <tr><td>Creation Date:</td><td id="creation-time"></td></tr>
                 <tr><td>Total Files:</td><td id="total-files"></td></tr>
-                <tr><td>Completed Files:</td><td><span id="completed-files">0</span>/<span id="total-checkable-files">0</span></td></tr>
                 <tr><td>Status:</td><td id="completion-status">Not Started</td></tr>
                 <tr><td>Total Size:</td><td id="total-size"></td></tr>
             </table>
@@ -370,10 +317,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th class="filename-col">Filename<div class="resizer" data-column="0"></div></th>
-                            <th class="size-col">Size<div class="resizer" data-column="1"></div></th>
-                            <th class="hash-col">Hash<div class="resizer" data-column="2"></div></th>
-                            <th class="status-col">Status<div class="resizer" data-column="3"></th>
+                            <th>Filename</th>
+                            <th>Size</th>
+                            <th>Hash</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="file-list"></tbody>
@@ -383,502 +330,359 @@
     </div>
 
     <script>
-    // Progress Tracker Class
-    class ProgressTracker {
-        constructor() {
-            this.startTime = null;
-            this.processedBytes = 0;
-            this.totalBytes = 0;
-            this.processed = 0;
-            this.total = 0;
-            this.recentSpeeds = [];
-            this.lastUpdateTime = null;
+        class BinaryReader {
+            constructor(buffer) {
+                this.view = new DataView(buffer);
+                this.offset = 0;
+            }
+
+            readUint32() {
+                const value = this.view.getUint32(this.offset, true);
+                this.offset += 4;
+                return value;
+            }
+
+            readBytes(length) {
+                const bytes = new Uint8Array(this.view.buffer, this.offset, length);
+                this.offset += length;
+                return bytes;
+            }
+
+            hasMore() {
+                return this.offset < this.view.byteLength;
+            }
         }
 
-        start(files) {
-            this.startTime = Date.now();
-            this.lastUpdateTime = this.startTime;
-            this.total = files.length;
-            this.processed = 0;
-            this.totalBytes = Array.from(files).reduce((sum, file) => sum + file.size, 0);
-            this.processedBytes = 0;
-            this.recentSpeeds = [];
-        }
-
-        update(processedFile) {
-            this.processed++;
-            this.processedBytes += processedFile.size;
-            
-            const currentTime = Date.now();
-            const timeDiff = (currentTime - this.lastUpdateTime) / 1000;
-            
-            if (timeDiff > 0) {
-                const bytesPerSecond = processedFile.size / timeDiff;
-                this.recentSpeeds.push(bytesPerSecond);
-                
-                if (this.recentSpeeds.length > 5) {
-                    this.recentSpeeds.shift();
+        const utils = {
+            formatSize(bytes) {
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let value = bytes;
+                let unit = 0;
+                while (value >= 1024 && unit < units.length - 1) {
+                    value /= 1024;
+                    unit++;
                 }
-            }
-            
-            this.lastUpdateTime = currentTime;
-        }
+                return `${value.toFixed(1)} ${units[unit]}`;
+            },
 
-        getStats() {
-            const currentTime = Date.now();
-            const elapsedSeconds = (currentTime - this.startTime) / 1000;
-            
-            const avgSpeed = this.recentSpeeds.length > 0 
-                ? this.recentSpeeds.reduce((a, b) => a + b) / this.recentSpeeds.length 
-                : this.processedBytes / elapsedSeconds;
-            
-            const remainingBytes = this.totalBytes - this.processedBytes;
-            const estimatedRemainingSeconds = avgSpeed > 0 ? remainingBytes / avgSpeed : 0;
-            
-            return {
-                progress: (this.processed / this.total) * 100,
-                processedFiles: this.processed,
-                totalFiles: this.total,
-                speed: avgSpeed,
-                remainingTime: estimatedRemainingSeconds,
-                elapsedTime: elapsedSeconds
-            };
-        }
-
-        formatTime(seconds) {
-            if (seconds < 60) {
-                return `${Math.round(seconds)}s`;
-            } else if (seconds < 3600) {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = Math.round(seconds % 60);
-                return `${minutes}m ${remainingSeconds}s`;
-            } else {
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                return `${hours}h ${minutes}m`;
-            }
-        }
-
-        formatSpeed(bytesPerSecond) {
-            const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
-            let value = bytesPerSecond;
-            let unitIndex = 0;
-            
-            while (value >= 1024 && unitIndex < units.length - 1) {
-                value /= 1024;
-                unitIndex++;
-            }
-            
-            return `${value.toFixed(1)} ${units[unitIndex]}`;
-        }
-    }
-
-    // Create Web Worker for hash computation
-    const hashWorker = new Worker(URL.createObjectURL(new Blob([`
-        self.onmessage = async function(e) {
-            const { buffer, id } = e.data;
-            try {
-                const hash = await crypto.subtle.digest('SHA-1', buffer);
-                const hashHex = Array.from(new Uint8Array(hash))
+            formatHash(hash) {
+                return Array.from(hash)
                     .map(b => b.toString(16).padStart(2, '0'))
                     .join('');
-                self.postMessage({ id, hash: hashHex, status: 'complete' });
-            } catch (error) {
-                self.postMessage({ id, error: error.message, status: 'error' });
+            },
+
+            formatDate(date) {
+                return new Intl.DateTimeFormat('default', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }).format(date);
+            },
+
+            isFolder(hash) {
+                return typeof hash === 'string' 
+                    ? hash === '0000000000000000000000000000000000000000'
+                    : this.formatHash(hash) === '0000000000000000000000000000000000000000';
+            },
+
+            showError(message) {
+                const error = document.getElementById('error');
+                error.innerHTML = `
+                    <span class="material-icons">error</span>
+                    <span class="error-message">${message}</span>
+                `;
+                error.classList.remove('hidden');
+                document.getElementById('metadata').classList.add('hidden');
+                document.getElementById('files').classList.add('hidden');
+            },
+
+            hideError() {
+                document.getElementById('error').classList.add('hidden');
+            },
+
+            updateStatus(element, status) {
+                const icons = {
+                    match: 'check_circle',
+                    mismatch: 'error',
+                    pending: 'pending',
+                    folder: 'folder'
+                };
+                element.innerHTML = `
+                    <span class="material-icons">${icons[status]}</span>
+                    ${status}
+                `;
+                element.className = `status ${status}`;
             }
         };
-    `], { type: 'application/javascript' })));
 
-    // Utility functions
-    const utils = {
-        formatSize(size) {
-            const units = ['B', 'KB', 'MB', 'GB'];
-            let value = typeof size === 'bigint' ? Number(size) : Number(size);
-            let unit = 0;
-            while (value >= 1024 && unit < units.length - 1) {
-                value /= 1024;
-                unit++;
-            }
-            return `${Math.round(value * 100) / 100} ${units[unit]}`;
-        },
-
-        formatHash(hash) {
-            return Array.from(hash)
-                .map(b => b.toString(16).padStart(2, '0'))
-                .join('');
-        },
-
-        formatDate(date) {
-            return new Intl.DateTimeFormat('default', {
-                year: 'numeric',
-                month: 'short',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            }).format(date);
-        },
-
-        isFolder(hash) {
-            return this.formatHash(hash) === '0000000000000000000000000000000000000000';
-        },
-
-        showError(message) {
-            const error = document.getElementById('error');
-            error.innerHTML = `
-                <span class="material-icons">error</span>
-                <span class="error-message">${message}</span>
-            `;
-            error.classList.remove('hidden');
-            document.getElementById('metadata').classList.add('hidden');
-            document.getElementById('files').classList.add('hidden');
-        },
-
-        hideError() {
-            document.getElementById('error').classList.add('hidden');
-        },
-
-        updateStatus(element, status) {
-            const icons = {
-                match: 'check_circle',
-                mismatch: 'error',
-                pending: 'pending',
-                folder: 'folder'
-            };
-            element.innerHTML = `
-                <span class="material-icons">${icons[status]}</span>
-                ${status}
-            `;
-            element.className = `status ${status}`;
-        }
-    };
-
-    // Binary Reader Class
-    class BinaryReader {
-        constructor(buffer) {
-            this.view = new DataView(buffer);
-            this.offset = 0;
-        }
-
-        readUint32() {
-            const value = this.view.getUint32(this.offset, true);
-            this.offset += 4;
-            return value;
-        }
-
-        readUint64() {
-            const low = this.view.getUint32(this.offset, true);
-            const high = this.view.getUint32(this.offset + 4, true);
-            this.offset += 8;
-            return high * 0x100000000 + low;
-        }
-
-        readBytes(length) {
-            const bytes = new Uint8Array(this.view.buffer, this.offset, length);
-            this.offset += length;
-            return bytes;
-        }
-
-        hasMore() {
-            return this.offset < this.view.byteLength;
-        }
-    }
-
-    // File Data Class
-    class FileData {
-        constructor() {
-            this.FileName = '';
-            this.FileHash = new Uint8Array();
-            this.TotalSize = 0n;
-        }
-    }
-
-    // Depot Manifest Class
-    class DepotManifest {
-        static PROTOBUF_PAYLOAD_MAGIC = 0x71F617D0;
-        static PROTOBUF_METADATA_MAGIC = 0x1F4812BE;
-        static PROTOBUF_SIGNATURE_MAGIC = 0x1B81B817;
-        static PROTOBUF_ENDOFMANIFEST_MAGIC = 0x32C415AB;
-
-        constructor() {
-            this.Files = [];
-            this.DepotID = 0;
-            this.ManifestGID = 0n;
-            this.CreationTime = new Date();
-            this.TotalUncompressedSize = 0n;
-        }
-
-        static async deserialize(buffer) {
-            const manifest = new DepotManifest();
-            const reader = new BinaryReader(buffer);
-
-            while (reader.hasMore()) {
-                const magic = reader.readUint32();
-                if (magic === this.PROTOBUF_ENDOFMANIFEST_MAGIC) break;
-
-                const length = reader.readUint32();
-                const data = reader.readBytes(length);
-
-                if (magic === this.PROTOBUF_PAYLOAD_MAGIC) manifest.parsePayload(data);
-                else if (magic === this.PROTOBUF_METADATA_MAGIC) manifest.parseMetadata(data);
-            }
-
-            return manifest;
-        }
-
-        parseVarint(bytes, offset = 0) {
-            let value = 0n;
-            let shift = 0n;
-            let index = offset;
-
-            while (index < bytes.length) {
-                const byte = bytes[index++];
-                value |= BigInt(byte & 0x7F) << shift;
-                if ((byte & 0x80) === 0) break;
-                shift += 7n;
-            }
-
-            return [value, index - offset];
-        }
-
-        readProtoField(bytes, offset) {
-            const [tag, tagLen] = this.parseVarint(bytes, offset);
-            const fieldNum = Number(tag >> 3n);
-            const wireType = Number(tag & 0x07n);
-            offset += tagLen;
-
-            let value, valueLen;
-
-            if (wireType === 0) {
-                [value, valueLen] = this.parseVarint(bytes, offset);
-            } else if (wireType === 2) {
-                [value, valueLen] = this.parseVarint(bytes, offset);
-                const strLen = Number(value);
-                value = bytes.slice(offset + valueLen, offset + valueLen + strLen);
-                valueLen += strLen;
-            } else {
-                throw new Error(`Unsupported wire type: ${wireType}`);
-            }
-
-            return { fieldNum, value, bytesRead: tagLen + valueLen };
-        }
-
-        parsePayload(data) {
-            let offset = 0;
-            while (offset < data.length) {
-                const field = this.readProtoField(data, offset);
-                offset += field.bytesRead;
-
-                if (field.fieldNum === 1) {
-                    const mapping = field.value;
-                    let mappingOffset = 0;
-                    const fileInfo = new FileData();
-
-                    while (mappingOffset < mapping.length) {
-                        const mappingField = this.readProtoField(mapping, mappingOffset);
-                        mappingOffset += mappingField.bytesRead;
-
-                        switch (mappingField.fieldNum) {
-                            case 1: fileInfo.FileName = new TextDecoder().decode(mappingField.value); break;
-                            case 2: fileInfo.TotalSize = Number(mappingField.value); break;
-                            case 5: fileInfo.FileHash = mappingField.value; break;
-                        }
-                    }
-
-                    if (fileInfo.FileName) this.Files.push(fileInfo);
-                }
-            }
-        }
-
-        parseMetadata(data) {
-            let offset = 0;
-            while (offset < data.length) {
-                const field = this.readProtoField(data, offset);
-                offset += field.bytesRead;
-
-                switch (field.fieldNum) {
-                    case 1: this.DepotID = Number(field.value); break;
-                    case 2: this.ManifestGID = field.value; break;
-                    case 3: this.CreationTime = new Date(Number(field.value) * 1000); break;
-                    case 5: this.TotalUncompressedSize = field.value; break;
-                }
-            }
-        }
-    }
-
-    function createProgressBar() {
-        const progressContainer = document.createElement('div');
-        progressContainer.className = 'progress-container';
-        progressContainer.innerHTML = `
-            <div class="progress-bar">
-                <div class="progress-fill"></div>
-            </div>
-            <div class="progress-stats">
-                <div class="progress-text">
-                    <span class="material-icons">task_alt</span>
-                    <span>0/0 files processed</span>
+        function createProgressBar() {
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'progress-container';
+            progressContainer.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
                 </div>
-                <div class="progress-details">
-                    <span><span class="material-icons">speed</span>Speed: --</span>
-                    <span><span class="material-icons">schedule</span>Elapsed: --</span>
-                    <span><span class="material-icons">update</span>Remaining: --</span>
+                <div class="progress-stats">
+                    <div class="progress-text">
+                        <span class="material-icons">task_alt</span>
+                        <span>Matched: <span id="matched-count">0</span>/<span id="total-checkable">0</span></span>
+                        <span class="speed-info">Speed: <span id="hash-speed">0 MB/s</span></span>
+                    </div>
                 </div>
-            </div>
-        `;
-        document.querySelector('.container').insertBefore(progressContainer, document.getElementById('files'));
-        return progressContainer;
-    }
-
-    // Main handlers
-    async function handleDirectory(files) {
-        if (!files.length || !window.currentManifest) {
-            utils.showError(!window.currentManifest ? 'Load manifest first' : 'No files selected');
-            return;
+            `;
+            document.querySelector('.container').insertBefore(progressContainer, document.getElementById('files'));
+            return progressContainer;
         }
 
-        utils.hideError();
-        const progressBar = createProgressBar();
-        const progressTracker = new ProgressTracker();
-        progressTracker.start(files);
-
-        const updateProgressDisplay = () => {
-            const stats = progressTracker.getStats();
-            const container = progressBar;
-            
-            container.querySelector('.progress-fill').style.width = `${stats.progress}%`;
-            container.querySelector('.progress-text span:last-child').textContent = 
-                `${stats.processedFiles}/${stats.totalFiles} files processed`;
-            
-            const details = container.querySelector('.progress-details').children;
-            details[0].innerHTML = `<span class="material-icons">speed</span>Speed: ${progressTracker.formatSpeed(stats.speed)}`;
-            details[1].innerHTML = `<span class="material-icons">schedule</span>Elapsed: ${progressTracker.formatTime(stats.elapsedTime)}`;
-            details[2].innerHTML = `<span class="material-icons">update</span>Remaining: ${progressTracker.formatTime(stats.remainingTime)}`;
-        };
-
-        hashWorker.onmessage = (e) => {
-            const { hash, status } = e.data;
-            if (status === 'complete') {
-                progressTracker.update(files[progressTracker.processed]);
-                updateProgressDisplay();
-                updateFileStatuses(hash);
-
-                if (progressTracker.processed === progressTracker.total) {
-                    progressBar.remove();
-                }
-            }
-        };
-
-        try {
-            for (const [index, file] of Array.from(files).entries()) {
-                const buffer = await file.arrayBuffer();
-                hashWorker.postMessage({ buffer, id: index }, [buffer]);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            utils.showError(error.message);
-            progressBar.remove();
+        function updateProgressDisplay(progressBar, stats) {
+            const progress = (stats.matches / stats.total) * 100;
+            progressBar.querySelector('.progress-fill').style.width = `${progress}%`;
+            progressBar.querySelector('#matched-count').textContent = stats.matches;
+            progressBar.querySelector('#total-checkable').textContent = stats.total;
+            progressBar.querySelector('#hash-speed').textContent = stats.speed;
         }
-    }
 
-    function updateFileStatuses(hash) {
-        const manifestHashes = window.currentManifest.Files.map(f => utils.formatHash(f.FileHash));
-        const matchStatus = manifestHashes.includes(hash) ? 'match' : 'mismatch';
-        
-        document.querySelectorAll('#file-list tr').forEach(row => {
-            const hashCell = row.querySelector('.file-hash');
-            if (hashCell && hashCell.textContent === hash) {
-                utils.updateStatus(row.querySelector('.status'), matchStatus);
+        async function handleDirectory(files) {
+            if (!files.length || !window.currentManifest) {
+                utils.showError(!window.currentManifest ? 'Load manifest first' : 'No files selected');
+                return;
             }
-        });
 
-        const completedFiles = document.querySelectorAll('#file-list tr .status.match, #file-list tr .status.mismatch').length;
-        const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - 
-            document.querySelectorAll('#file-list tr .status.folder').length;
-        
-        document.getElementById('completed-files').textContent = completedFiles;
-        document.getElementById('total-checkable-files').textContent = totalCheckableFiles;
-        
-        const completionStatus = document.getElementById('completion-status');
-        const statusType = completedFiles === 0 ? 'pending' : 
-                          completedFiles < totalCheckableFiles ? 'pending' : 'match';
-        utils.updateStatus(completionStatus, statusType);
-    }
+            utils.hideError();
+            const progressBar = createProgressBar();
+            const sha1 = await hashwasm.createSHA1();
+            const chunkSize = 8 * 1024 * 1024;
+            let processedBytes = 0;
+            let startTime = Date.now();
 
-    async function handleFiles(files) {
-        if (!files.length) return;
+            const readChunk = (file, offset, length) => new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsArrayBuffer(file.slice(offset, offset + length));
+            });
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
             try {
+                for (const file of files) {
+                    sha1.init();
+                    for (let offset = 0; offset < file.size; offset += chunkSize) {
+                        const chunk = await readChunk(file, offset, chunkSize);
+                        sha1.update(new Uint8Array(chunk));
+                        
+                        processedBytes += chunk.byteLength;
+                        const elapsed = (Date.now() - startTime) / 1000;
+                        const speed = processedBytes / elapsed;
+
+                        updateProgressDisplay(progressBar, {
+                            matches: document.querySelectorAll('#file-list tr .status.match').length,
+                            total: document.querySelectorAll('#file-list tr').length - 
+                                  document.querySelectorAll('#file-list tr .status.folder').length,
+                            speed: utils.formatSize(speed) + '/s'
+                        });
+                    }
+                    updateFileStatuses(sha1.digest());
+                }
+            } catch (error) {
+                utils.showError(error.message);
+            } finally {
+                progressBar.remove();
+            }
+        }
+
+        function updateFileStatuses(hash) {
+            const manifestHashes = window.currentManifest.Files.map(f => 
+                typeof f.FileHash === 'string' ? f.FileHash : utils.formatHash(f.FileHash));
+            const matchStatus = manifestHashes.includes(hash) ? 'match' : 'mismatch';
+            
+            document.querySelectorAll('#file-list tr').forEach(row => {
+                const hashCell = row.querySelector('.file-hash');
+                if (hashCell && hashCell.textContent === hash) {
+                    utils.updateStatus(row.querySelector('.status'), matchStatus);
+                }
+            });
+
+            const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
+            const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - 
+                document.querySelectorAll('#file-list tr .status.folder').length;
+            
+            const completionStatus = document.getElementById('completion-status');
+            const statusType = completedFiles === 0 ? 'pending' : 
+                             completedFiles < totalCheckableFiles ? 'pending' : 'match';
+            utils.updateStatus(completionStatus, statusType);
+        }
+
+        class Manifest {
+            static PAYLOAD_MAGIC = 0x71F617D0;
+            static METADATA_MAGIC = 0x1F4812BE;
+            static ENDOFMANIFEST_MAGIC = 0x32C415AB;
+
+            static async fromBuffer(buffer) {
+                const reader = new BinaryReader(buffer);
+                const manifest = {
+                    Files: [],
+                    DepotID: 0,
+                    ManifestGID: 0,
+                    CreationTime: new Date(),
+                    TotalSize: 0
+                };
+
+                while (reader.hasMore()) {
+                    const magic = reader.readUint32();
+                    if (magic === this.ENDOFMANIFEST_MAGIC) break;
+
+                    const length = reader.readUint32();
+                    const data = reader.readBytes(length);
+
+                    if (magic === this.PAYLOAD_MAGIC) {
+                        this.parsePayload(data, manifest);
+                    } else if (magic === this.METADATA_MAGIC) {
+                        this.parseMetadata(data, manifest);
+                    }
+                }
+
+                return manifest;
+            }
+
+            static parseVarint(bytes, offset = 0) {
+                let value = 0n;
+                let shift = 0n;
+                let index = offset;
+
+                while (index < bytes.length) {
+                    const byte = bytes[index++];
+                    value |= BigInt(byte & 0x7F) << shift;
+                    if ((byte & 0x80) === 0) break;
+                    shift += 7n;
+                }
+
+                return [value, index - offset];
+            }
+
+            static parseProtoField(bytes, offset) {
+                const [tag, tagLen] = this.parseVarint(bytes, offset);
+                const fieldNum = Number(tag >> 3n);
+                const wireType = Number(tag & 0x07n);
+                offset += tagLen;
+
+                let value, valueLen;
+                if (wireType === 0) {
+                    [value, valueLen] = this.parseVarint(bytes, offset);
+                } else if (wireType === 2) {
+                    [value, valueLen] = this.parseVarint(bytes, offset);
+                    const strLen = Number(value);
+                    value = bytes.slice(offset + valueLen, offset + valueLen + strLen);
+                    valueLen += strLen;
+                }
+
+                return { fieldNum, value, bytesRead: tagLen + valueLen };
+            }
+
+            static parsePayload(data, manifest) {
+                let offset = 0;
+                while (offset < data.length) {
+                    const field = this.parseProtoField(data, offset);
+                    offset += field.bytesRead;
+
+                    if (field.fieldNum === 1) {
+                        const mapping = field.value;
+                        let mappingOffset = 0;
+                        const fileInfo = { FileName: '', FileHash: new Uint8Array(), TotalSize: 0 };
+
+                        while (mappingOffset < mapping.length) {
+                            const mappingField = this.parseProtoField(mapping, mappingOffset);
+                            mappingOffset += mappingField.bytesRead;
+
+                            switch (mappingField.fieldNum) {
+                                case 1: fileInfo.FileName = new TextDecoder().decode(mappingField.value); break;
+                                case 2: fileInfo.TotalSize = Number(mappingField.value); break;
+                                case 5: fileInfo.FileHash = mappingField.value; break;
+                            }
+                        }
+
+                        if (fileInfo.FileName) manifest.Files.push(fileInfo);
+                    }
+                }
+            }
+
+            static parseMetadata(data, manifest) {
+                let offset = 0;
+                while (offset < data.length) {
+                    const field = this.parseProtoField(data, offset);
+                    offset += field.bytesRead;
+
+                    switch (field.fieldNum) {
+                        case 1: manifest.DepotID = Number(field.value); break;
+                        case 2: manifest.ManifestGID = field.value; break;
+                        case 3: manifest.CreationTime = new Date(Number(field.value) * 1000); break;
+                        case 5: manifest.TotalSize = Number(field.value); break;
+                    }
+                }
+            }
+        }
+
+        async function handleFiles(files) {
+            if (!files.length) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    utils.hideError();
+                    const manifest = await Manifest.fromBuffer(e.target.result);
+                    displayManifest(manifest);
+                } catch (err) {
+                    console.error('Error:', err);
+                    utils.showError('Invalid manifest file');
+                }
+            };
+
+            reader.readAsArrayBuffer(files[0]);
+        }
+
+        function displayManifest(manifest) {
+            try {
+                window.currentManifest = manifest;
+                
+                document.getElementById('depot-id').textContent = manifest.DepotID;
+                document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
+                document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+                
+                const fileList = document.getElementById('file-list');
+                fileList.innerHTML = '';
+                
+                manifest.Files.forEach(file => {
+                    const row = document.createElement('tr');
+                    const isFolder = utils.isFolder(file.FileHash);
+                    row.innerHTML = `
+                        <td>${file.FileName}</td>
+                        <td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
+                        <td class="file-hash">${isFolder ? 'Folder' : utils.formatHash(file.FileHash)}</td>
+                        <td class="status ${isFolder ? 'folder' : 'pending'}">
+                            <span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
+                            ${isFolder ? 'Folder' : 'pending'}
+                        </td>
+                    `;
+                    fileList.appendChild(row);
+                });
+                
+                const nonFolderFiles = manifest.Files.filter(file => !utils.isFolder(file.FileHash));
+                document.getElementById('total-files').textContent = nonFolderFiles.length;
+                document.getElementById('total-size').textContent = utils.formatSize(
+                    nonFolderFiles.reduce((sum, file) => sum + Number(file.TotalSize), 0)
+                );
+                utils.updateStatus(document.getElementById('completion-status'), 'pending');
+
+                document.getElementById('metadata').classList.remove('hidden');
+                document.getElementById('files').classList.remove('hidden');
                 utils.hideError();
-                const manifest = await DepotManifest.deserialize(e.target.result);
-                displayManifest(manifest);
             } catch (err) {
                 console.error('Error:', err);
-                utils.showError('Invalid manifest file');
+                utils.showError(err.message);
             }
-        };
-
-        reader.readAsArrayBuffer(files[0]);
-    }
-
-    function displayManifest(manifest) {
-        try {
-            window.currentManifest = manifest;
-            
-            document.getElementById('depot-id').textContent = manifest.DepotID;
-            document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
-            document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
-            
-            const fileList = document.getElementById('file-list');
-            fileList.innerHTML = '';
-            
-            manifest.Files.forEach(file => {
-                const row = document.createElement('tr');
-                const isFolder = utils.isFolder(file.FileHash);
-                row.innerHTML = `
-                    <td>${file.FileName}</td>
-                    <td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
-					<td class="file-hash">${isFolder ? 'Folder' : utils.formatHash(file.FileHash)}</td>
-                    <td class="status ${isFolder ? 'folder' : 'pending'}">
-                        <span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
-                        ${isFolder ? 'Folder' : 'pending'}
-                    </td>
-                `;
-                fileList.appendChild(row);
-            });
-            
-            // Calculate totals excluding folders
-            const nonFolderFiles = manifest.Files.filter(file => !utils.isFolder(file.FileHash));
-            const totalFiles = nonFolderFiles.length;
-            const totalSize = nonFolderFiles.reduce((sum, file) => sum + BigInt(file.TotalSize), 0n);
-
-            // Update UI elements
-            document.getElementById('total-files').textContent = totalFiles;
-            document.getElementById('total-checkable-files').textContent = totalFiles;
-            document.getElementById('completed-files').textContent = '0';
-            document.getElementById('total-size').textContent = utils.formatSize(totalSize);
-            utils.updateStatus(document.getElementById('completion-status'), 'pending');
-
-            // Show sections
-            document.getElementById('metadata').classList.remove('hidden');
-            document.getElementById('files').classList.remove('hidden');
-            utils.hideError();
-        } catch (err) {
-            console.error('Error:', err);
-            utils.showError(err.message);
-        }
-    }
-
-    // UI initialization
-    class UIManager {
-        constructor() {
-            this.bindEvents();
-            this.initializeResizing();
         }
 
-        bindEvents() {
-            // Drop zone events
+        function initializeUI() {
             ['drop-zone', 'dir-zone'].forEach(id => {
                 const element = document.getElementById(id);
                 const input = document.getElementById(id === 'drop-zone' ? 'file-input' : 'dir-input');
@@ -906,7 +710,6 @@
                 });
             });
 
-            // Search functionality
             document.getElementById('search').addEventListener('input', (e) => {
                 const term = e.target.value.toLowerCase();
                 document.querySelectorAll('#file-list tr').forEach(row => {
@@ -915,40 +718,8 @@
             });
         }
 
-        initializeResizing() {
-            let isResizing = false;
-            let currentTh = null;
-            let startX = null;
-            let startWidth = null;
-
-            document.querySelectorAll('.resizer').forEach(resizer => {
-                resizer.addEventListener('mousedown', e => {
-                    isResizing = true;
-                    currentTh = e.target.parentElement;
-                    startX = e.pageX;
-                    startWidth = currentTh.offsetWidth;
-                    
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                    e.preventDefault();
-                });
-            });
-
-            const onMouseMove = (e) => {
-                if (!isResizing) return;
-                currentTh.style.width = `${startWidth + (e.pageX - startX)}px`;
-            };
-
-            const onMouseUp = () => {
-                isResizing = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            };
-        }
-    }
-
-    // Initialize the application
-    new UIManager();
+        // Initialize the application
+        initializeUI();
     </script>
 </body>
 </html>
