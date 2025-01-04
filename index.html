@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steam Manifest Hash Checker</title>
-
     <!-- Required external resources -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap"
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4.11.0/dist/sha1.umd.min.js"></script>
-
     <style>
         :root {
             --bg: #1a1f2e;
@@ -31,7 +28,6 @@
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --transition: all 0.3s ease;
         }
-
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg);
@@ -40,7 +36,6 @@
             margin: 0;
             min-height: 100vh;
         }
-
         .container {
             max-width: 1920px;
             margin: 0 auto;
@@ -48,7 +43,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .header {
             background: var(--metallic);
             padding: 1.5rem 2rem;
@@ -56,7 +50,6 @@
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
-
         .header h1 {
             margin: 0;
             font-size: 1.75rem;
@@ -66,13 +59,11 @@
             align-items: center;
             gap: 0.75rem;
         }
-
         .dropzones {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
         }
-
         .dropzone {
             flex: 1;
             border: 2px dashed var(--primary);
@@ -89,7 +80,6 @@
             gap: 1rem;
             position: relative;
         }
-
         .dropzone input {
             position: absolute;
             top: 0;
@@ -99,14 +89,12 @@
             opacity: 0;
             cursor: pointer;
         }
-
         .dropzone:hover,
         .dropzone.drag-over {
             background: var(--metallic-hover);
             border-color: var(--primary-light);
             transform: translateY(-2px);
         }
-
         .section {
             background: var(--metallic);
             border: 1px solid var(--border);
@@ -115,7 +103,6 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
         }
-
         .progress-container {
             margin: 1.5rem 0;
             background: var(--metallic);
@@ -123,7 +110,6 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
-
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -131,28 +117,24 @@
             border-radius: 4px;
             overflow: hidden;
         }
-
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
             width: 0;
             transition: width 0.3s ease;
         }
-
         .table-container {
             overflow-x: auto;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: rgba(42, 50, 66, 0.5);
         }
-
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             table-layout: auto;
         }
-
         th {
             position: sticky;
             top: 0;
@@ -164,39 +146,31 @@
             text-align: left;
             white-space: nowrap;
         }
-
         td {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border);
             white-space: nowrap;
         }
-
         .status {
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
-
         .match {
             color: var(--success);
         }
-
         .mismatch {
             color: var(--error);
         }
-
         .pending {
             color: var(--warning);
         }
-
         .folder {
             color: var(--accent);
         }
-
         .hidden {
             display: none !important;
         }
-
         .error {
             color: var(--error);
             background: rgba(244, 67, 54, 0.1);
@@ -208,23 +182,19 @@
             align-items: center;
             gap: 0.5rem;
         }
-
         @media (max-width: 768px) {
             .container {
                 padding: 0 1rem;
             }
-
             .dropzones {
                 flex-direction: column;
             }
-
             .dropzone {
                 padding: 1.5rem;
             }
         }
     </style>
 </head>
-
 <body>
     <!-- Header -->
     <header class="header">
@@ -233,7 +203,6 @@
             Steam Manifest Hash Checker
         </h1>
     </header>
-
     <!-- Main Container -->
     <div class="container">
         <!-- Drop Zones -->
@@ -249,13 +218,11 @@
                 <input type="file" id="dir-input" webkitdirectory directory>
             </div>
         </div>
-
         <!-- Error Display -->
         <div id="error" class="error hidden">
             <span class="material-icons">error</span>
             <span class="error-message"></span>
         </div>
-
         <!-- File Metadata Section -->
         <div id="metadata" class="section hidden">
             <h2>
@@ -293,7 +260,6 @@
                 </tr>
             </table>
         </div>
-
         <!-- Mismatches Section -->
         <div id="mismatches" class="section hidden">
             <h2>
@@ -314,7 +280,6 @@
                 </table>
             </div>
         </div>
-
         <!-- Files Section -->
         <div id="files" class="section hidden">
             <h2>
@@ -336,7 +301,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Utility class for reading binary data
         class BinaryReader {
@@ -344,28 +308,23 @@
                 this.view = new DataView(buffer);
                 this.offset = 0;
             }
-
             readUint32() {
                 const value = this.view.getUint32(this.offset, true);
                 this.offset += 4;
                 return value;
             }
-
             readBytes(length) {
                 const bytes = new Uint8Array(this.view.buffer, this.offset, length);
                 this.offset += length;
                 return bytes;
             }
-
             hasMore() {
                 return this.offset < this.view.byteLength;
             }
         }
-
         // Progress Manager class to handle the progress bar
         const ProgressManager = {
             container: null,
-
             create() {
                 this.container = document.createElement('div');
                 this.container.className = 'progress-container';
@@ -392,7 +351,6 @@
                 );
                 return this.container;
             },
-
             update(stats) {
                 if (!this.container) return;
                 const progress = (stats.matches / stats.total) * 100;
@@ -401,7 +359,6 @@
                 this.container.querySelector('#total-checkable').textContent = stats.total;
                 this.container.querySelector('#hash-speed').textContent = stats.speed;
             },
-
             remove() {
                 if (this.container) {
                     this.container.remove();
@@ -409,7 +366,6 @@
                 }
             }
         };
-
         // File Processing Utilities
         const FileProcessor = {
             async readChunk(file, offset, length) {
@@ -419,7 +375,6 @@
                     reader.readAsArrayBuffer(file.slice(offset, offset + length));
                 });
             },
-
             getRelativePath(file) {
                 let relativePath = file.webkitRelativePath;
                 if (!relativePath || relativePath.startsWith('/')) {
@@ -428,7 +383,6 @@
                 const pathParts = relativePath.split('/');
                 return pathParts.length > 1 ? pathParts.slice(1).join('/') : file.name;
             },
-
             createMismatchRow(fileName, fileSize, expectedHash, actualHash) {
                 const mismatchRow = document.createElement('tr');
                 mismatchRow.innerHTML = `
@@ -440,7 +394,6 @@
                 return mismatchRow;
             }
         };
-
         // General Utility Functions
         const utils = {
             formatSize(bytes) {
@@ -453,13 +406,11 @@
                 }
                 return `${value.toFixed(1)} ${units[unit]}`;
             },
-
             formatHash(hash) {
                 return Array.from(hash)
                     .map(b => b.toString(16).padStart(2, '0'))
                     .join('');
             },
-
             formatDate(date) {
                 return new Intl.DateTimeFormat('default', {
                     year: 'numeric',
@@ -470,18 +421,15 @@
                     second: '2-digit'
                 }).format(date);
             },
-
             isFolder(hash) {
                 return typeof hash === 'string' ?
                     hash === '0000000000000000000000000000000000000000' :
                     this.formatHash(hash) === '0000000000000000000000000000000000000000';
             },
-
             isNonEmptyFolder(file, allFiles) {
                 if (!this.isFolder(file.FileHash)) return false;
                 return allFiles.some(f => f.FileName.startsWith(file.FileName + '/'));
             },
-
             normalizePath(path) {
                 path = path.replace(/\\/g, '/');
                 path = path.replace(/^\/+|\/+$/g, '');
@@ -489,24 +437,20 @@
                 path = path.replace(/\/+/g, '/');
                 return path.toLowerCase();
             },
-
             findMatchingFile(fileName) {
                 if (!window.currentManifest?.Files) return null;
                 // Normalize input path
                 const normalizedInput = this.normalizePath(fileName);
                 const files = window.currentManifest.Files;
-
                 // 1. Try exact match first (case-insensitive)
                 const exactMatch = files.find(f =>
                     this.normalizePath(f.FileName) === normalizedInput
                 );
                 if (exactMatch) return exactMatch;
-
                 // Get the base name and directory of the input file
                 const inputParts = normalizedInput.split('/');
                 const inputBaseName = inputParts[inputParts.length - 1];
                 const inputDirectory = inputParts.slice(0, -1).join('/');
-
                 // 2. Find all potential matches based on filename
                 const candidates = files.filter(f => {
                     const manifestPath = this.normalizePath(f.FileName);
@@ -514,21 +458,16 @@
                     const manifestBaseName = manifestParts[manifestParts.length - 1];
                     return manifestBaseName === inputBaseName;
                 });
-
                 if (candidates.length === 0) return null;
                 if (candidates.length === 1) return candidates[0];
-
                 // 3. Multiple candidates - find best match using strict path comparison
                 let bestMatch = null;
                 let bestScore = -1;
-
                 for (const candidate of candidates) {
                     const manifestPath = this.normalizePath(candidate.FileName);
                     const manifestParts = manifestPath.split('/');
                     const manifestDirectory = manifestParts.slice(0, -1).join('/');
-
                     let score = 0;
-
                     // Exact directory match gets highest score
                     if (manifestDirectory === inputDirectory) {
                         score = 1000;
@@ -537,7 +476,6 @@
                     else if (inputDirectory && manifestDirectory) {
                         const inputDirParts = inputDirectory.split('/');
                         const manifestDirParts = manifestDirectory.split('/');
-
                         // Compare directory parts from right to left
                         for (let i = 1; i <= Math.min(inputDirParts.length, manifestDirParts.length); i++) {
                             if (inputDirParts[inputDirParts.length - i] ===
@@ -548,26 +486,20 @@
                             }
                         }
                     }
-
                     if (score > bestScore) {
                         bestScore = score;
                         bestMatch = candidate;
                     }
                 }
-
                 return bestScore >= 10 ? bestMatch : null;
             },
-
             parseSHA1File(content) {
                 const lines = content.split(/[\r\n]+/).filter(line => line.trim());
                 const files = [];
                 const seenFiles = new Set();
-
                 lines.forEach((line, index) => {
                     line = line.trim().replace(/^\uFEFF/, '');
-
                     if (!line || line.startsWith('#')) return;
-
                     try {
                         let hash, fileName;
                         let match = line.match(/([a-fA-F0-9]{40})\s+[*]?(.+)/i);
@@ -586,10 +518,8 @@
                                 }
                             }
                         }
-
                         if (hash && fileName) {
                             fileName = fileName.trim().replace(/\\/g, '/');
-
                             const fileKey = `${fileName}|${hash}`;
                             if (!seenFiles.has(fileKey)) {
                                 seenFiles.add(fileKey);
@@ -604,11 +534,9 @@
                         console.warn(`Failed to parse line ${index}:`, err);
                     }
                 });
-
                 if (files.length === 0) {
                     throw new Error('No valid SHA1 hashes found in file');
                 }
-
                 return {
                     Files: files,
                     DepotID: 'SHA1 File',
@@ -618,7 +546,6 @@
                     isSHA1File: true
                 };
             },
-
             markPendingAsMissing() {
                 document.querySelectorAll('#file-list tr .status.pending').forEach(status => {
                     utils.updateStatus(status, 'mismatch');
@@ -626,7 +553,6 @@
                     const fileName = row.children[0].textContent;
                     const fileSize = row.children[1].textContent;
                     const expectedHash = row.children[2].textContent;
-
                     const mismatchList = document.getElementById('mismatch-list');
                     const mismatchRow = FileProcessor.createMismatchRow(
                         fileName,
@@ -636,12 +562,10 @@
                     );
                     mismatchList.appendChild(mismatchRow);
                 });
-
                 if (document.getElementById('mismatch-list').children.length > 0) {
                     document.getElementById('mismatches').classList.remove('hidden');
                 }
             },
-
             showError(message) {
                 const error = document.getElementById('error');
                 error.innerHTML = `
@@ -653,11 +577,9 @@
                 document.getElementById('files').classList.add('hidden');
                 document.getElementById('mismatches').classList.add('hidden');
             },
-
             hideError() {
                 document.getElementById('error').classList.add('hidden');
             },
-
             updateStatus(element, status) {
                 const icons = {
                     match: 'check_circle',
@@ -672,13 +594,11 @@
                 element.className = `status ${status}`;
             }
         };
-
         // Steam Manifest Parser Class
         class Manifest {
             static PAYLOAD_MAGIC = 0x71F617D0;
             static METADATA_MAGIC = 0x1F4812BE;
             static ENDOFMANIFEST_MAGIC = 0x32C415AB;
-
             static async fromBuffer(buffer) {
                 const reader = new BinaryReader(buffer);
                 const manifest = {
@@ -688,7 +608,6 @@
                     CreationTime: new Date(),
                     TotalSize: 0
                 };
-
                 while (reader.hasMore()) {
                     const magic = reader.readUint32();
                     if (magic === this.ENDOFMANIFEST_MAGIC) break;
@@ -702,7 +621,6 @@
                 }
                 return manifest;
             }
-
             static parseVarint(bytes, offset = 0) {
                 let value = 0n;
                 let shift = 0n;
@@ -715,7 +633,6 @@
                 }
                 return [value, index - offset];
             }
-
             static parseProtoField(bytes, offset) {
                 const [tag, tagLen] = this.parseVarint(bytes, offset);
                 const fieldNum = Number(tag >> 3n);
@@ -736,7 +653,6 @@
                     bytesRead: tagLen + valueLen
                 };
             }
-
             static parsePayload(data, manifest) {
                 let offset = 0;
                 while (offset < data.length) {
@@ -769,7 +685,6 @@
                     }
                 }
             }
-
             static parseMetadata(data, manifest) {
                 let offset = 0;
                 while (offset < data.length) {
@@ -792,7 +707,6 @@
                 }
             }
         }
-
         // Main Functions
         async function handleDirectory(files) {
             if (!files.length || !window.currentManifest) {
@@ -805,7 +719,6 @@
             const chunkSize = 8 * 1024 * 1024;
             let processedBytes = 0;
             let startTime = Date.now();
-
             try {
                 for (const file of files) {
                     sha1.init();
@@ -816,13 +729,11 @@
                         sha1.update(new Uint8Array(chunk));
                         processedBytes += chunkSize;
                         chunkOffset += chunkSize;
-
                         if (chunkOffset === file.size) {
                             const relativePath = FileProcessor.getRelativePath(file);
                             console.log('Processing file:', relativePath); // Debug log
                             updateFileStatuses(sha1.digest(), relativePath);
                         }
-
                         const elapsed = (Date.now() - startTime) / 1000;
                         const speed = processedBytes / elapsed;
                         ProgressManager.update({
@@ -837,7 +748,6 @@
                 utils.showError(error.message);
             } finally {
                 utils.markPendingAsMissing();
-
                 const totalCheckableFiles = document.querySelectorAll('#file-list tr').length -
                     document.querySelectorAll('#file-list tr .status.folder').length;
                 const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
@@ -846,16 +756,13 @@
                 }
             }
         }
-
         async function handleManifestFile(file) {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     utils.hideError();
                     let uploadedManifest;
-
                     const content = new TextDecoder().decode(e.target.result);
-
                     if (file.name.toLowerCase().endsWith('.sha1') ||
                         file.type === 'text/plain' ||
                         content.includes('sha1') ||
@@ -868,33 +775,26 @@
                     } else {
                         uploadedManifest = await Manifest.fromBuffer(e.target.result);
                     }
-
                     displayManifest(uploadedManifest);
                 } catch (err) {
                     console.error('Error parsing file:', err);
                     utils.showError('Invalid file format: ' + err.message);
                 }
             };
-
             reader.readAsArrayBuffer(file);
         }
-
         function updateFileStatuses(hash, fileName) {
             const manifestFile = utils.findMatchingFile(fileName);
             if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
-
             const expectedHash = window.currentManifest.isSHA1File ?
                 manifestFile.FileHash :
                 utils.formatHash(manifestFile.FileHash);
-
             const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
             const matchStatus = expectedHash.toLowerCase() === actualHash.toLowerCase() ? 'match' : 'mismatch';
-
             document.querySelectorAll('#file-list tr').forEach(row => {
                 const rowFileName = row.children[0].textContent;
                 if (rowFileName === manifestFile.FileName) {
                     utils.updateStatus(row.querySelector('.status'), matchStatus);
-
                     if (matchStatus === 'mismatch') {
                         const mismatchList = document.getElementById('mismatch-list');
                         const mismatchRow = FileProcessor.createMismatchRow(
@@ -908,16 +808,13 @@
                     }
                 }
             });
-
             updateCompletionStatus();
         }
-
         function updateCompletionStatus() {
             const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
             const totalCheckableFiles = document.querySelectorAll('#file-list tr').length -
                 document.querySelectorAll('#file-list tr .status.folder').length;
             const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
-
             let statusType = 'pending';
             if (completedFiles > 0) {
                 if (completedFiles === totalCheckableFiles) {
@@ -926,23 +823,18 @@
                     statusType = 'mismatch';
                 }
             }
-
             utils.updateStatus(document.getElementById('completion-status'), statusType);
         }
-
         function displayManifest(manifest) {
             try {
                 window.currentManifest = manifest;
                 document.getElementById('mismatch-list').innerHTML = '';
                 document.getElementById('mismatches').classList.add('hidden');
-
                 document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
                 document.getElementById('depot-id').textContent = manifest.DepotID;
                 document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
                 document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
-
                 const filteredFiles = manifest.Files.filter(file => !utils.isNonEmptyFolder(file, manifest.Files));
-
                 const fileList = document.getElementById('file-list');
                 fileList.innerHTML = '';
                 filteredFiles.forEach(file => {
@@ -959,7 +851,6 @@
                     `;
                     fileList.appendChild(row);
                 });
-
                 const nonFolderFiles = filteredFiles.filter(file => !utils.isFolder(file.FileHash));
                 document.getElementById('total-files').textContent = nonFolderFiles.length;
                 document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum,
@@ -973,17 +864,14 @@
                 utils.showError(err.message);
             }
         }
-
         // Initialize the UI
         function initializeUI() {
             document.getElementById('file-input').addEventListener('change', (e) => {
                 if (e.target.files[0]) handleManifestFile(e.target.files[0]);
             });
-
             document.getElementById('dir-input').addEventListener('change', (e) => {
                 if (e.target.files.length) handleDirectory(Array.from(e.target.files));
             });
-
             ['drop-zone', 'dir-zone'].forEach(id => {
                 const element = document.getElementById(id);
                 element.addEventListener('dragover', (e) => {
@@ -991,24 +879,20 @@
                     e.stopPropagation();
                     element.classList.add('drag-over');
                 });
-
                 element.addEventListener('dragleave', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     element.classList.remove('drag-over');
                 });
-
                 element.addEventListener('drop', async (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     element.classList.remove('drag-over');
-
                     if (id === 'drop-zone' && e.dataTransfer.files[0]) {
                         handleManifestFile(e.dataTransfer.files[0]);
                     } else if (id === 'dir-zone') {
                         const items = e.dataTransfer.items;
                         const files = [];
-
                         async function getAllFiles(entry) {
                             return new Promise((resolve) => {
                                 if (entry.isFile) {
@@ -1034,7 +918,6 @@
                                 }
                             });
                         }
-
                         const promises = [];
                         for (const item of items) {
                             if (item.kind === 'file') {
@@ -1044,9 +927,7 @@
                                 }
                             }
                         }
-
                         await Promise.all(promises);
-
                         if (files.length > 0) {
                             handleDirectory(files);
                         }
@@ -1054,10 +935,8 @@
                 });
             });
         }
-
         // Start the application
         initializeUI();
     </script>
 </body>
-
 </html>
