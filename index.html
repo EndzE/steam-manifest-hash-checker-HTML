@@ -1,995 +1,1063 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steam Manifest Hash Checker</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+
+    <!-- Required external resources -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4.11.0/dist/sha1.umd.min.js"></script>
-    <!-- Previous CSS styles remain the same -->
+
     <style>
-      :root {
-        --bg: #1a1f2e;
-        --text: #e0e6f2;
-        --border: #2a3242;
-        --hover: #2d344c;
-        --primary: #4a74c9;
-        --primary-dark: #385fa8;
-        --primary-light: #6189d8;
-        --metallic: linear-gradient(145deg, #2a3242, #1e2433);
-        --metallic-hover: linear-gradient(145deg, #2d344c, #212737);
-        --accent: #64b5f6;
-        --success: #4caf50;
-        --error: #f44336;
-        --warning: #ff9800;
-        --radius: 12px;
-        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        --transition: all 0.3s ease;
-      }
+        :root {
+            --bg: #1a1f2e;
+            --text: #e0e6f2;
+            --border: #2a3242;
+            --hover: #2d344c;
+            --primary: #4a74c9;
+            --primary-dark: #385fa8;
+            --primary-light: #6189d8;
+            --metallic: linear-gradient(145deg, #2a3242, #1e2433);
+            --metallic-hover: linear-gradient(145deg, #2d344c, #212737);
+            --accent: #64b5f6;
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
 
-      body {
-        font-family: 'Inter', system-ui, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.6;
-        margin: 0;
-        min-height: 100vh;
-      }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            min-height: 100vh;
+        }
 
-      .container {
-        max-width: 1920px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .header {
-        background: var(--metallic);
-        padding: 1.5rem 2rem;
-        box-shadow: var(--shadow);
-        margin-bottom: 2rem;
-        border-bottom: 1px solid var(--border);
-      }
-
-      .header h1 {
-        margin: 0;
-        font-size: 1.75rem;
-        font-weight: 600;
-        color: var(--primary-light);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-
-      .header h1 .material-icons {
-        font-size: 2rem;
-      }
-
-      .dropzones {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      .dropzone {
-        flex: 1;
-        border: 2px dashed var(--primary);
-        border-radius: var(--radius);
-        padding: 2rem;
-        text-align: center;
-        cursor: pointer;
-        background: var(--metallic);
-        transition: var(--transition);
-        box-shadow: var(--shadow);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        position: relative;
-      }
-
-      .dropzone input {
-        display: block;
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 9999999;
-        opacity: 0;
-      }
-
-      .dropzone .material-icons {
-        font-size: 2.5rem;
-        color: var(--primary-light);
-      }
-
-      .dropzone:hover,
-      .dropzone.drag-over {
-        background: var(--metallic-hover);
-        border-color: var(--primary-light);
-        transform: translateY(-2px);
-      }
-
-      .section,
-      #mismatches {
-        background: var(--metallic);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: var(--shadow);
-      }
-
-      .section h2,
-      #mismatches h2 {
-        color: var(--primary-light);
-        margin: 0 0 1.5rem;
-        font-size: 1.25rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      #mismatches h2 {
-        color: var(--error);
-      }
-
-      #mismatches {
-        order: 2;
-      }
-
-      #files {
-        order: 3;
-      }
-
-      .progress-container {
-        margin: 1.5rem 0;
-        background: var(--metallic);
-        padding: 1.5rem;
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-      }
-
-      .progress-bar {
-        width: 100%;
-        height: 8px;
-        background: var(--border);
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-      }
-
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-        width: 0;
-        transition: width 0.3s ease;
-      }
-
-      .progress-stats {
-        text-align: center;
-        font-size: 0.9rem;
-      }
-
-      .progress-text {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-      }
-
-      .progress-text .material-icons {
-        font-size: 1rem;
-      }
-
-      .speed-info {
-        color: var(--accent);
-      }
-
-      .table-container {
-        overflow-x: auto;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: rgba(42, 50, 66, 0.5);
-      }
-
-      table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        table-layout: auto;
-      }
-
-      th {
-        position: sticky;
-        top: 0;
-        background: var(--primary-dark);
-        color: var(--text);
-        border-bottom: 2px solid var(--border);
-        padding: 0.75rem 1rem;
-        font-weight: 500;
-        text-align: left;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        user-select: none;
-      }
-
-      td {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--border);
-        white-space: nowrap;
-      }
-
-      tr:hover td {
-        background: var(--hover);
-      }
-
-      .search-container {
-        margin-bottom: 1rem;
-        position: relative;
-        padding: 0.5rem;
-        background: var(--metallic);
-        border-radius: var(--radius);
-        border: 1px solid var(--border);
-      }
-
-      .search {
-        width: 100%;
-        padding: 0.75rem 1rem 0.75rem 2.5rem;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: rgba(42, 50, 66, 0.5);
-        color: var(--text);
-        font-size: 0.9rem;
-        transition: var(--transition);
-        box-sizing: border-box;
-      }
-
-      .search-icon {
-        position: absolute;
-        left: 1.25rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--accent);
-        font-size: 1.25rem;
-        pointer-events: none;
-      }
-
-      .status {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-
-      .match {
-        color: var(--success);
-      }
-
-      .mismatch {
-        color: var(--error);
-      }
-
-      .pending {
-        color: var(--warning);
-      }
-
-      .folder {
-        color: var(--accent);
-      }
-
-      .hidden {
-        display: none !important;
-      }
-
-      .file-hash {
-        white-space: nowrap;
-        font-family: 'Roboto Mono', monospace;
-        font-size: 0.9em;
-        color: var(--accent);
-      }
-
-      .error {
-        color: var(--error);
-        background: rgba(244, 67, 54, 0.1);
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        border: 1px solid rgba(244, 67, 54, 0.2);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      @media (max-width: 768px) {
         .container {
-          padding: 0 1rem;
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: var(--metallic);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
 
         .dropzones {
-          flex-direction: column;
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
         .dropzone {
-          padding: 1.5rem;
+            flex: 1;
+            border: 2px dashed var(--primary);
+            border-radius: var(--radius);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            background: var(--metallic);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
         }
-      }
-    </style>
-  </head>
-  <body>
-    <header class="header">
-      <h1>
-        <span class="material-icons">verified</span>Steam Manifest/SHA1 Checker
-      </h1>
-    </header>
-    <div class="container">
-      <div class="dropzones">
-        <div class="dropzone" id="drop-zone">
-          <span class="material-icons">upload_file</span> Drop Steam manifest or SHA1 file here <input type="file" id="file-input">
-        </div>
-        <div class="dropzone" id="dir-zone">
-          <span class="material-icons">folder_open</span> Drop files to validate here <input type="file" id="dir-input" webkitdirectory directory>
-        </div>
-      </div>
-      <div id="error" class="error hidden">
-        <span class="material-icons">error</span>
-        <span class="error-message"></span>
-      </div>
-      <div id="metadata" class="section hidden">
-        <h2>
-          <span class="material-icons">info</span>File Info
-        </h2>
-        <table>
-          <tr>
-            <td>Type:</td>
-            <td id="file-type"></td>
-          </tr>
-          <tr>
-            <td>Depot ID:</td>
-            <td id="depot-id"></td>
-          </tr>
-          <tr>
-            <td>Manifest ID:</td>
-            <td id="manifest-gid"></td>
-          </tr>
-          <tr>
-            <td>Creation Date:</td>
-            <td id="creation-time"></td>
-          </tr>
-          <tr>
-            <td>Total Files:</td>
-            <td id="total-files"></td>
-          </tr>
-          <tr>
-            <td>Status:</td>
-            <td id="completion-status">Not Started</td>
-          </tr>
-          <tr>
-            <td>Total Size:</td>
-            <td id="total-size"></td>
-          </tr>
-        </table>
-      </div>
-      <div id="mismatches" class="section hidden">
-        <h2>
-          <span class="material-icons" style="color: var(--error);">warning</span>Mismatched Files
-        </h2>
-        <div class="table-container">
-          <table>
-            <thead>
-                <tr>
-                    <th style="width: 40%">Filename</th>
-                    <th style="width: 10%">Size</th>
-                    <th style="width: 25%">Expected Hash</th>
-                    <th style="width: 25%">Actual Hash</th>
-                </tr>
-            </thead>
-            <tbody id="mismatch-list"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="files" class="section hidden">
-        <h2>
-          <span class="material-icons">folder</span>Files
-        </h2>
-        <div class="search-container">
-          <span class="material-icons search-icon">search</span>
-          <input type="text" id="search" class="search" placeholder="Search files...">
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-                <tr>
-                    <th style="width: 40%">Filename</th>
-                    <th style="width: 10%">Size</th>
-                    <th style="width: 25%">Hash</th>
-                    <th style="width: 25%">Status</th>
-                </tr>
-            </thead>
-            <tbody id="file-list"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <script>
-      class BinaryReader {
-        constructor(buffer) {
-          this.view = new DataView(buffer);
-          this.offset = 0;
-        }
-        readUint32() {
-          const value = this.view.getUint32(this.offset, true);
-          this.offset += 4;
-          return value;
-        }
-        readBytes(length) {
-          const bytes = new Uint8Array(this.view.buffer, this.offset, length);
-          this.offset += length;
-          return bytes;
-        }
-        hasMore() {
-          return this.offset < this.view.byteLength;
-        }
-      }
 
-      const utils = {
-        formatSize(bytes) {
-          const units = ['B', 'KB', 'MB', 'GB'];
-          let value = bytes;
-          let unit = 0;
-          while (value >= 1024 && unit < units.length - 1) {
-            value /= 1024;
-            unit++;
-          }
-          return `${value.toFixed(1)} ${units[unit]}`;
-        },
-        formatHash(hash) {
-          return Array.from(hash).map(b => b.toString(16).padStart(2, '0')).join('');
-        },
-        formatDate(date) {
-          return new Intl.DateTimeFormat('default', {
-            year: 'numeric',
-            month: 'short',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          }).format(date);
-        },
-        isFolder(hash) {
-          return typeof hash === 'string' ? hash === '0000000000000000000000000000000000000000' : this.formatHash(hash) === '0000000000000000000000000000000000000000';
-        },
-        isNonEmptyFolder(file, allFiles) {
-          if (!this.isFolder(file.FileHash)) return false;
-          return allFiles.some(f => f.FileName.startsWith(file.FileName + '/'));
-        },
-        parseSHA1File(content) {
-          const lines = content.split(/[\r\n]+/).filter(line => line.trim());
-          const files = [];
-          const seenFiles = new Set();
-          
-          lines.forEach((line, index) => {
-            line = line.trim().replace(/^\uFEFF/, '');
-            
-            if (!line || line.startsWith('#')) return;
-            
-            try {
-              let hash, fileName;
-              let match = line.match(/([a-fA-F0-9]{40})\s+[*]?(.+)/i);
-              if (match) {
-                [, hash, fileName] = match;
-              } else {
-                match = line.match(/SHA1\((.*?)\)[= ]+([a-fA-F0-9]{40})/i);
-                if (match) {
-                  [, fileName, hash] = match;
-                } else {
-                  match = line.match(/([a-fA-F0-9]{40})/i);
-                  if (match) {
-                    hash = match[1];
-                    fileName = line.replace(hash, '').trim();
-                    if (!fileName) fileName = `file_${index}`;
-                  }
-                }
-              }
-              
-              if (hash && fileName) {
-                fileName = fileName.trim().replace(/\\/g, '/');
-                
-                const fileKey = `${fileName}|${hash}`;
-                if (!seenFiles.has(fileKey)) {
-                  seenFiles.add(fileKey);
-                  files.push({
-                    FileName: fileName,
-                    FileHash: hash.toLowerCase(),
-                    TotalSize: 0
-                  });
-                }
-              }
-            } catch (err) {
-              console.warn(`Failed to parse line ${index}:`, err);
+        .dropzone input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .dropzone:hover,
+        .dropzone.drag-over {
+            background: var(--metallic-hover);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .section {
+            background: var(--metallic);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-container {
+            margin: 1.5rem 0;
+            background: var(--metallic);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(42, 50, 66, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            table-layout: auto;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: var(--primary-dark);
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .match {
+            color: var(--success);
+        }
+
+        .mismatch {
+            color: var(--error);
+        }
+
+        .pending {
+            color: var(--warning);
+        }
+
+        .folder {
+            color: var(--accent);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .error {
+            color: var(--error);
+            background: rgba(244, 67, 54, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
             }
-          });
-          
-          if (files.length === 0) {
-            throw new Error('No valid SHA1 hashes found in file');
-          }
-          
-          return {
-            Files: files,
-            DepotID: 'SHA1 File',
-            ManifestGID: 'N/A',
-            CreationTime: new Date(),
-            TotalSize: 0,
-            isSHA1File: true
-          };
-        },
-        markPendingAsMissing() {
-          document.querySelectorAll('#file-list tr .status.pending').forEach(status => {
-            utils.updateStatus(status, 'mismatch');
-            const row = status.parentElement;
-            const fileName = row.children[0].textContent;
-            const fileSize = row.children[1].textContent;
-            const expectedHash = row.children[2].textContent;
-            const mismatchList = document.getElementById('mismatch-list');
-            const mismatchRow = document.createElement('tr');
-            const fullPath = window.currentManifest.Files.find(f => f.FileName === fileName)?.FileName || fileName;
-            mismatchRow.innerHTML = `
-              <td>${fullPath}</td>
-              <td>${fileSize}</td>
-              <td class="file-hash">${expectedHash}</td>
-              <td class="file-hash">File Missing</td>
-            `;
-            mismatchList.appendChild(mismatchRow);
-          });
-          
-          if (document.getElementById('mismatch-list').children.length > 0) {
-            document.getElementById('mismatches').classList.remove('hidden');
-          }
-        },
-        showError(message) {
-          const error = document.getElementById('error');
-          error.innerHTML = `
+
+            .dropzones {
+                flex-direction: column;
+            }
+
+            .dropzone {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>
+            <span class="material-icons">verified</span>
+            Steam Manifest Hash Checker
+        </h1>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Drop Zones -->
+        <div class="dropzones">
+            <div class="dropzone" id="drop-zone">
+                <span class="material-icons">upload_file</span>
+                Drop Steam manifest or SHA1 file here
+                <input type="file" id="file-input">
+            </div>
+            <div class="dropzone" id="dir-zone">
+                <span class="material-icons">folder_open</span>
+                Drop folder to verify here
+                <input type="file" id="dir-input" webkitdirectory directory>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div id="error" class="error hidden">
             <span class="material-icons">error</span>
-            <span class="error-message">${message}</span>
-          `;
-          error.classList.remove('hidden');
-          document.getElementById('metadata').classList.add('hidden');
-          document.getElementById('files').classList.add('hidden');
-          document.getElementById('mismatches').classList.add('hidden');
-        },
-        hideError() {
-          document.getElementById('error').classList.add('hidden');
-        },
-        updateStatus(element, status) {
-          const icons = {
-            match: 'check_circle',
-            mismatch: 'error',
-            pending: 'pending',
-            folder: 'folder'
-          };
-          element.innerHTML = `
-            <span class="material-icons">${icons[status]}</span>
-            ${status}
-          `;
-          element.className = `status ${status}`;
-        },
-        findMatchingFile(fileName) {
-            // Get the full path components
-            const fileParts = fileName.replace(/\\/g, '/').split('/');
-            const baseName = fileParts[fileParts.length - 1];
-            
-            // Find all files in manifest with matching base name
-            const candidates = window.currentManifest.Files.filter(f => {
-                const manifestParts = f.FileName.replace(/\\/g, '/').split('/');
-                return manifestParts[manifestParts.length - 1] === baseName;
-            });
-            
-            if (candidates.length === 0) return null;
-            if (candidates.length === 1) return candidates[0];
-            
-            // Multiple matches found - need to compare paths
-            let bestMatch = null;
-            let bestMatchScore = -1;
-            
-            for (const candidate of candidates) {
-                const manifestParts = candidate.FileName.replace(/\\/g, '/').split('/');
-                let score = 0;
-                
-                // Compare path components from end to start
-                for (let i = 1; i <= Math.min(fileParts.length, manifestParts.length); i++) {
-                    if (fileParts[fileParts.length - i] === manifestParts[manifestParts.length - i]) {
-                        score++;
-                    } else {
-                        break;
+            <span class="error-message"></span>
+        </div>
+
+        <!-- File Metadata Section -->
+        <div id="metadata" class="section hidden">
+            <h2>
+                <span class="material-icons">info</span>
+                File Info
+            </h2>
+            <table>
+                <tr>
+                    <td>Type:</td>
+                    <td id="file-type"></td>
+                </tr>
+                <tr>
+                    <td>Depot ID:</td>
+                    <td id="depot-id"></td>
+                </tr>
+                <tr>
+                    <td>Manifest ID:</td>
+                    <td id="manifest-gid"></td>
+                </tr>
+                <tr>
+                    <td>Creation Date:</td>
+                    <td id="creation-time"></td>
+                </tr>
+                <tr>
+                    <td>Total Files:</td>
+                    <td id="total-files"></td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td id="completion-status">Not Started</td>
+                </tr>
+                <tr>
+                    <td>Total Size:</td>
+                    <td id="total-size"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Mismatches Section -->
+        <div id="mismatches" class="section hidden">
+            <h2>
+                <span class="material-icons" style="color: var(--error);">warning</span>
+                Mismatched Files
+            </h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Filename</th>
+                            <th style="width: 10%">Size</th>
+                            <th style="width: 25%">Expected Hash</th>
+                            <th style="width: 25%">Actual Hash</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mismatch-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Files Section -->
+        <div id="files" class="section hidden">
+            <h2>
+                <span class="material-icons">folder</span>
+                Files
+            </h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">Filename</th>
+                            <th style="width: 10%">Size</th>
+                            <th style="width: 25%">Hash</th>
+                            <th style="width: 25%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Utility class for reading binary data
+        class BinaryReader {
+            constructor(buffer) {
+                this.view = new DataView(buffer);
+                this.offset = 0;
+            }
+
+            readUint32() {
+                const value = this.view.getUint32(this.offset, true);
+                this.offset += 4;
+                return value;
+            }
+
+            readBytes(length) {
+                const bytes = new Uint8Array(this.view.buffer, this.offset, length);
+                this.offset += length;
+                return bytes;
+            }
+
+            hasMore() {
+                return this.offset < this.view.byteLength;
+            }
+        }
+
+        // Progress Manager class to handle the progress bar
+        const ProgressManager = {
+            container: null,
+
+            create() {
+                this.container = document.createElement('div');
+                this.container.className = 'progress-container';
+                this.container.innerHTML = `
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="progress-text">
+                            <span class="material-icons">task_alt</span>
+                            <span>Matched: 
+                                <span id="matched-count">0</span>/
+                                <span id="total-checkable">0</span>
+                            </span>
+                            <span class="speed-info">Speed: 
+                                <span id="hash-speed">0 MB/s</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                document.querySelector('.container').insertBefore(
+                    this.container,
+                    document.getElementById('files')
+                );
+                return this.container;
+            },
+
+            update(stats) {
+                if (!this.container) return;
+                const progress = (stats.matches / stats.total) * 100;
+                this.container.querySelector('.progress-fill').style.width = `${progress}%`;
+                this.container.querySelector('#matched-count').textContent = stats.matches;
+                this.container.querySelector('#total-checkable').textContent = stats.total;
+                this.container.querySelector('#hash-speed').textContent = stats.speed;
+            },
+
+            remove() {
+                if (this.container) {
+                    this.container.remove();
+                    this.container = null;
+                }
+            }
+        };
+
+        // File Processing Utilities
+        const FileProcessor = {
+            async readChunk(file, offset, length) {
+                return new Promise(resolve => {
+                    const reader = new FileReader();
+                    reader.onload = e => resolve(e.target.result);
+                    reader.readAsArrayBuffer(file.slice(offset, offset + length));
+                });
+            },
+
+            getRelativePath(file) {
+                let relativePath = file.webkitRelativePath;
+                if (!relativePath || relativePath.startsWith('/')) {
+                    return file.name;
+                }
+                const pathParts = relativePath.split('/');
+                return pathParts.length > 1 ? pathParts.slice(1).join('/') : file.name;
+            },
+
+            createMismatchRow(fileName, fileSize, expectedHash, actualHash) {
+                const mismatchRow = document.createElement('tr');
+                mismatchRow.innerHTML = `
+                    <td>${fileName}</td>
+                    <td>${fileSize}</td>
+                    <td class="file-hash">${expectedHash}</td>
+                    <td class="file-hash">${actualHash}</td>
+                `;
+                return mismatchRow;
+            }
+        };
+
+        // General Utility Functions
+        const utils = {
+            formatSize(bytes) {
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let value = bytes;
+                let unit = 0;
+                while (value >= 1024 && unit < units.length - 1) {
+                    value /= 1024;
+                    unit++;
+                }
+                return `${value.toFixed(1)} ${units[unit]}`;
+            },
+
+            formatHash(hash) {
+                return Array.from(hash)
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('');
+            },
+
+            formatDate(date) {
+                return new Intl.DateTimeFormat('default', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }).format(date);
+            },
+
+            isFolder(hash) {
+                return typeof hash === 'string' ?
+                    hash === '0000000000000000000000000000000000000000' :
+                    this.formatHash(hash) === '0000000000000000000000000000000000000000';
+            },
+
+            isNonEmptyFolder(file, allFiles) {
+                if (!this.isFolder(file.FileHash)) return false;
+                return allFiles.some(f => f.FileName.startsWith(file.FileName + '/'));
+            },
+
+            normalizePath(path) {
+                path = path.replace(/\\/g, '/');
+                path = path.replace(/^\/+|\/+$/g, '');
+                path = path.replace(/^\.\//, '');
+                path = path.replace(/\/+/g, '/');
+                return path.toLowerCase();
+            },
+
+            findMatchingFile(fileName) {
+                if (!window.currentManifest?.Files) return null;
+                // Normalize input path
+                const normalizedInput = this.normalizePath(fileName);
+                const files = window.currentManifest.Files;
+
+                // 1. Try exact match first (case-insensitive)
+                const exactMatch = files.find(f =>
+                    this.normalizePath(f.FileName) === normalizedInput
+                );
+                if (exactMatch) return exactMatch;
+
+                // Get the base name and directory of the input file
+                const inputParts = normalizedInput.split('/');
+                const inputBaseName = inputParts[inputParts.length - 1];
+                const inputDirectory = inputParts.slice(0, -1).join('/');
+
+                // 2. Find all potential matches based on filename
+                const candidates = files.filter(f => {
+                    const manifestPath = this.normalizePath(f.FileName);
+                    const manifestParts = manifestPath.split('/');
+                    const manifestBaseName = manifestParts[manifestParts.length - 1];
+                    return manifestBaseName === inputBaseName;
+                });
+
+                if (candidates.length === 0) return null;
+                if (candidates.length === 1) return candidates[0];
+
+                // 3. Multiple candidates - find best match using strict path comparison
+                let bestMatch = null;
+                let bestScore = -1;
+
+                for (const candidate of candidates) {
+                    const manifestPath = this.normalizePath(candidate.FileName);
+                    const manifestParts = manifestPath.split('/');
+                    const manifestDirectory = manifestParts.slice(0, -1).join('/');
+
+                    let score = 0;
+
+                    // Exact directory match gets highest score
+                    if (manifestDirectory === inputDirectory) {
+                        score = 1000;
+                    }
+                    // Partial directory match gets lower score
+                    else if (inputDirectory && manifestDirectory) {
+                        const inputDirParts = inputDirectory.split('/');
+                        const manifestDirParts = manifestDirectory.split('/');
+
+                        // Compare directory parts from right to left
+                        for (let i = 1; i <= Math.min(inputDirParts.length, manifestDirParts.length); i++) {
+                            if (inputDirParts[inputDirParts.length - i] ===
+                                manifestDirParts[manifestDirParts.length - i]) {
+                                score += 10;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMatch = candidate;
                     }
                 }
-                
-                // Prefer exact length matches
-                if (score > 0 && fileParts.length === manifestParts.length) {
-                    score += 1000;
+
+                return bestScore >= 10 ? bestMatch : null;
+            },
+
+            parseSHA1File(content) {
+                const lines = content.split(/[\r\n]+/).filter(line => line.trim());
+                const files = [];
+                const seenFiles = new Set();
+
+                lines.forEach((line, index) => {
+                    line = line.trim().replace(/^\uFEFF/, '');
+
+                    if (!line || line.startsWith('#')) return;
+
+                    try {
+                        let hash, fileName;
+                        let match = line.match(/([a-fA-F0-9]{40})\s+[*]?(.+)/i);
+                        if (match) {
+                            [, hash, fileName] = match;
+                        } else {
+                            match = line.match(/SHA1\((.*?)\)[= ]+([a-fA-F0-9]{40})/i);
+                            if (match) {
+                                [, fileName, hash] = match;
+                            } else {
+                                match = line.match(/([a-fA-F0-9]{40})/i);
+                                if (match) {
+                                    hash = match[1];
+                                    fileName = line.replace(hash, '').trim();
+                                    if (!fileName) fileName = `file_${index}`;
+                                }
+                            }
+                        }
+
+                        if (hash && fileName) {
+                            fileName = fileName.trim().replace(/\\/g, '/');
+
+                            const fileKey = `${fileName}|${hash}`;
+                            if (!seenFiles.has(fileKey)) {
+                                seenFiles.add(fileKey);
+                                files.push({
+                                    FileName: fileName,
+                                    FileHash: hash.toLowerCase(),
+                                    TotalSize: 0
+                                });
+                            }
+                        }
+                    } catch (err) {
+                        console.warn(`Failed to parse line ${index}:`, err);
+                    }
+                });
+
+                if (files.length === 0) {
+                    throw new Error('No valid SHA1 hashes found in file');
                 }
-                
-                if (score > bestMatchScore) {
-                    bestMatchScore = score;
-                    bestMatch = candidate;
-                }
-            }
-            
-            return bestMatch;
-        }
-      };
 
-      function createProgressBar() {
-        const progressContainer = document.createElement('div');
-        progressContainer.className = 'progress-container';
-        progressContainer.innerHTML = `
-          <div class="progress-bar">
-            <div class="progress-fill"></div>
-          </div>
-          <div class="progress-stats">
-            <div class="progress-text">
-              <span class="material-icons">task_alt</span>
-              <span>Matched: 
-                <span id="matched-count">0</span>/
-                <span id="total-checkable">0</span>
-              </span>
-              <span class="speed-info">Speed: 
-                <span id="hash-speed">0 MB/s</span>
-              </span>
-            </div>
-          </div>
-        `;
-        document.querySelector('.container').insertBefore(progressContainer, document.getElementById('files'));
-        return progressContainer;
-      }
+                return {
+                    Files: files,
+                    DepotID: 'SHA1 File',
+                    ManifestGID: 'N/A',
+                    CreationTime: new Date(),
+                    TotalSize: 0,
+                    isSHA1File: true
+                };
+            },
 
-      function updateProgressDisplay(progressBar, stats) {
-        const progress = (stats.matches / stats.total) * 100;
-        progressBar.querySelector('.progress-fill').style.width = `${progress}%`;
-        progressBar.querySelector('#matched-count').textContent = stats.matches;
-        progressBar.querySelector('#total-checkable').textContent = stats.total;
-        progressBar.querySelector('#hash-speed').textContent = stats.speed;
-      }
+            markPendingAsMissing() {
+                document.querySelectorAll('#file-list tr .status.pending').forEach(status => {
+                    utils.updateStatus(status, 'mismatch');
+                    const row = status.parentElement;
+                    const fileName = row.children[0].textContent;
+                    const fileSize = row.children[1].textContent;
+                    const expectedHash = row.children[2].textContent;
 
-      function updateFileStatuses(hash, fileName) {
-        const manifestFile = utils.findMatchingFile(fileName);
-        if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
-        
-        const expectedHash = window.currentManifest.isSHA1File ? 
-            manifestFile.FileHash : 
-            utils.formatHash(manifestFile.FileHash);
-            
-        const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
-        const matchStatus = expectedHash.toLowerCase() === actualHash.toLowerCase() ? 'match' : 'mismatch';
-        
-        document.querySelectorAll('#file-list tr').forEach(row => {
-            const rowFileName = row.children[0].textContent;
-            if (rowFileName === manifestFile.FileName) {
-                utils.updateStatus(row.querySelector('.status'), matchStatus);
-                
-                if (matchStatus === 'mismatch') {
                     const mismatchList = document.getElementById('mismatch-list');
-                    const mismatchRow = document.createElement('tr');
-                    mismatchRow.innerHTML = `
-                        <td>${manifestFile.FileName}</td>
-                        <td>${row.children[1].textContent}</td>
-                        <td class="file-hash">${expectedHash}</td>
-                        <td class="file-hash">${actualHash}</td>
-                    `;
+                    const mismatchRow = FileProcessor.createMismatchRow(
+                        fileName,
+                        fileSize,
+                        expectedHash,
+                        'File Missing'
+                    );
                     mismatchList.appendChild(mismatchRow);
+                });
+
+                if (document.getElementById('mismatch-list').children.length > 0) {
                     document.getElementById('mismatches').classList.remove('hidden');
                 }
+            },
+
+            showError(message) {
+                const error = document.getElementById('error');
+                error.innerHTML = `
+        <span class="material-icons">error</span>
+        <span class="error-message">${message}</span>
+    `;
+                error.classList.remove('hidden');
+                document.getElementById('metadata').classList.add('hidden');
+                document.getElementById('files').classList.add('hidden');
+                document.getElementById('mismatches').classList.add('hidden');
+            },
+
+            hideError() {
+                document.getElementById('error').classList.add('hidden');
+            },
+
+            updateStatus(element, status) {
+                const icons = {
+                    match: 'check_circle',
+                    mismatch: 'error',
+                    pending: 'pending',
+                    folder: 'folder'
+                };
+                element.innerHTML = `
+        <span class="material-icons">${icons[status]}</span>
+        ${status}
+    `;
+                element.className = `status ${status}`;
             }
-        });
-        
-        const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
-        const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - 
-                                document.querySelectorAll('#file-list tr .status.folder').length;
-        const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
-        
-        let statusType = 'pending';
-        if (completedFiles > 0) {
-            if (completedFiles === totalCheckableFiles) {
-                statusType = mismatchedFiles === 0 ? 'match' : 'mismatch';
-            } else if (mismatchedFiles > 0) {
-                statusType = 'mismatch';
-            }
-        }
-        
-        const completionStatus = document.getElementById('completion-status');
-        utils.updateStatus(completionStatus, statusType);
-      }
-
-      class Manifest {
-        static PAYLOAD_MAGIC = 0x71F617D0;
-        static METADATA_MAGIC = 0x1F4812BE;
-        static ENDOFMANIFEST_MAGIC = 0x32C415AB;
-
-        static async fromBuffer(buffer) {
-          const reader = new BinaryReader(buffer);
-          const manifest = {
-            Files: [],
-            DepotID: 0,
-            ManifestGID: 0,
-            CreationTime: new Date(),
-            TotalSize: 0
-          };
-          while (reader.hasMore()) {
-            const magic = reader.readUint32();
-            if (magic === this.ENDOFMANIFEST_MAGIC) break;
-            const length = reader.readUint32();
-            const data = reader.readBytes(length);
-            if (magic === this.PAYLOAD_MAGIC) {
-              this.parsePayload(data, manifest);
-            } else if (magic === this.METADATA_MAGIC) {
-              this.parseMetadata(data, manifest);
-            }
-          }
-          return manifest;
-        }
-
-        static parseVarint(bytes, offset = 0) {
-          let value = 0n;
-          let shift = 0n;
-          let index = offset;
-          while (index < bytes.length) {
-            const byte = bytes[index++];
-            value |= BigInt(byte & 0x7F) << shift;
-            if ((byte & 0x80) === 0) break;
-            shift += 7n;
-          }
-          return [value, index - offset];
-        }
-
-        static parseProtoField(bytes, offset) {
-          const [tag, tagLen] = this.parseVarint(bytes, offset);
-          const fieldNum = Number(tag >> 3n);
-          const wireType = Number(tag & 0x07n);
-          offset += tagLen;
-          let value, valueLen;
-          if (wireType === 0) {
-            [value, valueLen] = this.parseVarint(bytes, offset);
-          } else if (wireType === 2) {
-            [value, valueLen] = this.parseVarint(bytes, offset);
-            const strLen = Number(value);
-            value = bytes.slice(offset + valueLen, offset + valueLen + strLen);
-            valueLen += strLen;
-          }
-          return {
-            fieldNum,
-            value,
-            bytesRead: tagLen + valueLen
-          };
-        }
-
-        static parsePayload(data, manifest) {
-          let offset = 0;
-          while (offset < data.length) {
-            const field = this.parseProtoField(data, offset);
-            offset += field.bytesRead;
-            if (field.fieldNum === 1) {
-              const mapping = field.value;
-              let mappingOffset = 0;
-              const fileInfo = {
-                FileName: '',
-                FileHash: new Uint8Array(),
-                TotalSize: 0
-              };
-              while (mappingOffset < mapping.length) {
-                const mappingField = this.parseProtoField(mapping, mappingOffset);
-                mappingOffset += mappingField.bytesRead;
-                switch (mappingField.fieldNum) {
-                  case 1:
-                    fileInfo.FileName = new TextDecoder().decode(mappingField.value);
-                    break;
-                  case 2:
-                    fileInfo.TotalSize = Number(mappingField.value);
-                    break;
-                  case 5:
-                    fileInfo.FileHash = mappingField.value;
-                    break;
-                }
-              }
-              if (fileInfo.FileName) manifest.Files.push(fileInfo);
-            }
-          }
-        }
-
-        static parseMetadata(data, manifest) {
-          let offset = 0;
-          while (offset < data.length) {
-            const field = this.parseProtoField(data, offset);
-            offset += field.bytesRead;
-            switch (field.fieldNum) {
-              case 1:
-                manifest.DepotID = Number(field.value);
-                break;
-              case 2:
-                manifest.ManifestGID = field.value;
-                break;
-              case 3:
-                manifest.CreationTime = new Date(Number(field.value) * 1000);
-                break;
-              case 5:
-                manifest.TotalSize = Number(field.value);
-                break;
-            }
-          }
-        }
-      }
-
-      async function handleManfiestFile(file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            utils.hideError();
-            let uploadedManifest;
-            
-            const content = new TextDecoder().decode(e.target.result);
-            
-            if (file.name.toLowerCase().endsWith('.sha1') || 
-                file.type === 'text/plain' || 
-                content.includes('sha1') || 
-                content.match(/[a-fA-F0-9]{40}/i)) {
-              try {
-                uploadedManifest = utils.parseSHA1File(content);
-              } catch (sha1Err) {
-                uploadedManifest = await Manifest.fromBuffer(e.target.result);
-              }
-            } else {
-              uploadedManifest = await Manifest.fromBuffer(e.target.result);
-            }
-            
-            displayManifest(uploadedManifest);
-          } catch (err) {
-            console.error('Error parsing file:', err);
-            utils.showError('Invalid file format: ' + err.message);
-          }
         };
-        
-        reader.readAsArrayBuffer(file);
-      }
 
-async function handleDirectory(files) {
-    if (!files.length || !window.currentManifest) {
-        utils.showError(!window.currentManifest ? 'Load manifest or SHA1 file first' : 'No files selected');
-        return;
-    }
-    utils.hideError();
-    const progressBar = createProgressBar();
-    const sha1 = await hashwasm.createSHA1();
-    const chunkSize = 8 * 1024 * 1024;
-    let processedBytes = 0;
-    let startTime = Date.now();
-    
-    const readChunk = (file, offset, length) => new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsArrayBuffer(file.slice(offset, offset + length));
-    });
-    
-    try {
-        for (const file of files) {
-            sha1.init();
-            let chunkOffset = 0;
-            while (chunkOffset < file.size) {
-                const chunkSize = Math.min(8 * 1024 * 1024, file.size - chunkOffset);
-                const chunk = await readChunk(file, chunkOffset, chunkSize);
-                sha1.update(new Uint8Array(chunk));
-                processedBytes += chunkSize;
-                chunkOffset += chunkSize;
-                const elapsed = (Date.now() - startTime) / 1000;
-                const speed = processedBytes / elapsed;
-                if (chunkOffset === file.size) {
-                    updateFileStatuses(sha1.digest(), file.name);
+        // Steam Manifest Parser Class
+        class Manifest {
+            static PAYLOAD_MAGIC = 0x71F617D0;
+            static METADATA_MAGIC = 0x1F4812BE;
+            static ENDOFMANIFEST_MAGIC = 0x32C415AB;
+
+            static async fromBuffer(buffer) {
+                const reader = new BinaryReader(buffer);
+                const manifest = {
+                    Files: [],
+                    DepotID: 0,
+                    ManifestGID: 0,
+                    CreationTime: new Date(),
+                    TotalSize: 0
+                };
+
+                while (reader.hasMore()) {
+                    const magic = reader.readUint32();
+                    if (magic === this.ENDOFMANIFEST_MAGIC) break;
+                    const length = reader.readUint32();
+                    const data = reader.readBytes(length);
+                    if (magic === this.PAYLOAD_MAGIC) {
+                        this.parsePayload(data, manifest);
+                    } else if (magic === this.METADATA_MAGIC) {
+                        this.parseMetadata(data, manifest);
+                    }
                 }
-                updateProgressDisplay(progressBar, {
-                    matches: document.querySelectorAll('#file-list tr .status.match').length,
-                    total: document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length,
-                    speed: utils.formatSize(speed) + '/s'
+                return manifest;
+            }
+
+            static parseVarint(bytes, offset = 0) {
+                let value = 0n;
+                let shift = 0n;
+                let index = offset;
+                while (index < bytes.length) {
+                    const byte = bytes[index++];
+                    value |= BigInt(byte & 0x7F) << shift;
+                    if ((byte & 0x80) === 0) break;
+                    shift += 7n;
+                }
+                return [value, index - offset];
+            }
+
+            static parseProtoField(bytes, offset) {
+                const [tag, tagLen] = this.parseVarint(bytes, offset);
+                const fieldNum = Number(tag >> 3n);
+                const wireType = Number(tag & 0x07n);
+                offset += tagLen;
+                let value, valueLen;
+                if (wireType === 0) {
+                    [value, valueLen] = this.parseVarint(bytes, offset);
+                } else if (wireType === 2) {
+                    [value, valueLen] = this.parseVarint(bytes, offset);
+                    const strLen = Number(value);
+                    value = bytes.slice(offset + valueLen, offset + valueLen + strLen);
+                    valueLen += strLen;
+                }
+                return {
+                    fieldNum,
+                    value,
+                    bytesRead: tagLen + valueLen
+                };
+            }
+
+            static parsePayload(data, manifest) {
+                let offset = 0;
+                while (offset < data.length) {
+                    const field = this.parseProtoField(data, offset);
+                    offset += field.bytesRead;
+                    if (field.fieldNum === 1) {
+                        const mapping = field.value;
+                        let mappingOffset = 0;
+                        const fileInfo = {
+                            FileName: '',
+                            FileHash: new Uint8Array(),
+                            TotalSize: 0
+                        };
+                        while (mappingOffset < mapping.length) {
+                            const mappingField = this.parseProtoField(mapping, mappingOffset);
+                            mappingOffset += mappingField.bytesRead;
+                            switch (mappingField.fieldNum) {
+                                case 1:
+                                    fileInfo.FileName = new TextDecoder().decode(mappingField.value);
+                                    break;
+                                case 2:
+                                    fileInfo.TotalSize = Number(mappingField.value);
+                                    break;
+                                case 5:
+                                    fileInfo.FileHash = mappingField.value;
+                                    break;
+                            }
+                        }
+                        if (fileInfo.FileName) manifest.Files.push(fileInfo);
+                    }
+                }
+            }
+
+            static parseMetadata(data, manifest) {
+                let offset = 0;
+                while (offset < data.length) {
+                    const field = this.parseProtoField(data, offset);
+                    offset += field.bytesRead;
+                    switch (field.fieldNum) {
+                        case 1:
+                            manifest.DepotID = Number(field.value);
+                            break;
+                        case 2:
+                            manifest.ManifestGID = field.value;
+                            break;
+                        case 3:
+                            manifest.CreationTime = new Date(Number(field.value) * 1000);
+                            break;
+                        case 5:
+                            manifest.TotalSize = Number(field.value);
+                            break;
+                    }
+                }
+            }
+        }
+
+        // Main Functions
+        async function handleDirectory(files) {
+            if (!files.length || !window.currentManifest) {
+                utils.showError(!window.currentManifest ? 'Load manifest or SHA1 file first' : 'No files selected');
+                return;
+            }
+            utils.hideError();
+            const progress = ProgressManager.create();
+            const sha1 = await hashwasm.createSHA1();
+            const chunkSize = 8 * 1024 * 1024;
+            let processedBytes = 0;
+            let startTime = Date.now();
+
+            try {
+                for (const file of files) {
+                    sha1.init();
+                    let chunkOffset = 0;
+                    while (chunkOffset < file.size) {
+                        const chunkSize = Math.min(8 * 1024 * 1024, file.size - chunkOffset);
+                        const chunk = await FileProcessor.readChunk(file, chunkOffset, chunkSize);
+                        sha1.update(new Uint8Array(chunk));
+                        processedBytes += chunkSize;
+                        chunkOffset += chunkSize;
+
+                        if (chunkOffset === file.size) {
+                            const relativePath = FileProcessor.getRelativePath(file);
+                            console.log('Processing file:', relativePath); // Debug log
+                            updateFileStatuses(sha1.digest(), relativePath);
+                        }
+
+                        const elapsed = (Date.now() - startTime) / 1000;
+                        const speed = processedBytes / elapsed;
+                        ProgressManager.update({
+                            matches: document.querySelectorAll('#file-list tr .status.match').length,
+                            total: document.querySelectorAll('#file-list tr').length -
+                                document.querySelectorAll('#file-list tr .status.folder').length,
+                            speed: utils.formatSize(speed) + '/s'
+                        });
+                    }
+                }
+            } catch (error) {
+                utils.showError(error.message);
+            } finally {
+                utils.markPendingAsMissing();
+
+                const totalCheckableFiles = document.querySelectorAll('#file-list tr').length -
+                    document.querySelectorAll('#file-list tr .status.folder').length;
+                const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
+                if (completedFiles === totalCheckableFiles) {
+                    ProgressManager.remove();
+                }
+            }
+        }
+
+        async function handleManifestFile(file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    utils.hideError();
+                    let uploadedManifest;
+
+                    const content = new TextDecoder().decode(e.target.result);
+
+                    if (file.name.toLowerCase().endsWith('.sha1') ||
+                        file.type === 'text/plain' ||
+                        content.includes('sha1') ||
+                        content.match(/[a-fA-F0-9]{40}/i)) {
+                        try {
+                            uploadedManifest = utils.parseSHA1File(content);
+                        } catch (sha1Err) {
+                            uploadedManifest = await Manifest.fromBuffer(e.target.result);
+                        }
+                    } else {
+                        uploadedManifest = await Manifest.fromBuffer(e.target.result);
+                    }
+
+                    displayManifest(uploadedManifest);
+                } catch (err) {
+                    console.error('Error parsing file:', err);
+                    utils.showError('Invalid file format: ' + err.message);
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateFileStatuses(hash, fileName) {
+            const manifestFile = utils.findMatchingFile(fileName);
+            if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
+
+            const expectedHash = window.currentManifest.isSHA1File ?
+                manifestFile.FileHash :
+                utils.formatHash(manifestFile.FileHash);
+
+            const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
+            const matchStatus = expectedHash.toLowerCase() === actualHash.toLowerCase() ? 'match' : 'mismatch';
+
+            document.querySelectorAll('#file-list tr').forEach(row => {
+                const rowFileName = row.children[0].textContent;
+                if (rowFileName === manifestFile.FileName) {
+                    utils.updateStatus(row.querySelector('.status'), matchStatus);
+
+                    if (matchStatus === 'mismatch') {
+                        const mismatchList = document.getElementById('mismatch-list');
+                        const mismatchRow = FileProcessor.createMismatchRow(
+                            manifestFile.FileName,
+                            row.children[1].textContent,
+                            expectedHash,
+                            actualHash
+                        );
+                        mismatchList.appendChild(mismatchRow);
+                        document.getElementById('mismatches').classList.remove('hidden');
+                    }
+                }
+            });
+
+            updateCompletionStatus();
+        }
+
+        function updateCompletionStatus() {
+            const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
+            const totalCheckableFiles = document.querySelectorAll('#file-list tr').length -
+                document.querySelectorAll('#file-list tr .status.folder').length;
+            const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
+
+            let statusType = 'pending';
+            if (completedFiles > 0) {
+                if (completedFiles === totalCheckableFiles) {
+                    statusType = mismatchedFiles === 0 ? 'match' : 'mismatch';
+                } else if (mismatchedFiles > 0) {
+                    statusType = 'mismatch';
+                }
+            }
+
+            utils.updateStatus(document.getElementById('completion-status'), statusType);
+        }
+
+        function displayManifest(manifest) {
+            try {
+                window.currentManifest = manifest;
+                document.getElementById('mismatch-list').innerHTML = '';
+                document.getElementById('mismatches').classList.add('hidden');
+
+                document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
+                document.getElementById('depot-id').textContent = manifest.DepotID;
+                document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
+                document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+
+                const filteredFiles = manifest.Files.filter(file => !utils.isNonEmptyFolder(file, manifest.Files));
+
+                const fileList = document.getElementById('file-list');
+                fileList.innerHTML = '';
+                filteredFiles.forEach(file => {
+                    const row = document.createElement('tr');
+                    const isFolder = utils.isFolder(file.FileHash);
+                    row.innerHTML = `
+                        <td>${file.FileName}</td>
+                        <td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
+                        <td class="file-hash">${isFolder ? 'Folder' : (manifest.isSHA1File ? file.FileHash : utils.formatHash(file.FileHash))}</td>
+                        <td class="status ${isFolder ? 'folder' : 'pending'}">
+                            <span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
+                            ${isFolder ? 'Folder' : 'pending'}
+                        </td>
+                    `;
+                    fileList.appendChild(row);
                 });
+
+                const nonFolderFiles = filteredFiles.filter(file => !utils.isFolder(file.FileHash));
+                document.getElementById('total-files').textContent = nonFolderFiles.length;
+                document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum,
+                    file) => sum + Number(file.TotalSize), 0));
+                utils.updateStatus(document.getElementById('completion-status'), 'pending');
+                document.getElementById('metadata').classList.remove('hidden');
+                document.getElementById('files').classList.remove('hidden');
+                utils.hideError();
+            } catch (err) {
+                console.error('Error:', err);
+                utils.showError(err.message);
             }
         }
-    } catch (error) {
-        utils.showError(error.message);
-    } finally {
-        utils.markPendingAsMissing();
-        
-        const totalCheckableFiles = document.querySelectorAll('#file-list tr').length - document.querySelectorAll('#file-list tr .status.folder').length;
-        const completedFiles = document.querySelectorAll('#file-list tr .status.match').length;
-        if (completedFiles === totalCheckableFiles) {
-            progressBar.remove();
+
+        // Initialize the UI
+        function initializeUI() {
+            document.getElementById('file-input').addEventListener('change', (e) => {
+                if (e.target.files[0]) handleManifestFile(e.target.files[0]);
+            });
+
+            document.getElementById('dir-input').addEventListener('change', (e) => {
+                if (e.target.files.length) handleDirectory(Array.from(e.target.files));
+            });
+
+            ['drop-zone', 'dir-zone'].forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    element.classList.add('drag-over');
+                });
+
+                element.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    element.classList.remove('drag-over');
+                });
+
+                element.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    element.classList.remove('drag-over');
+
+                    if (id === 'drop-zone' && e.dataTransfer.files[0]) {
+                        handleManifestFile(e.dataTransfer.files[0]);
+                    } else if (id === 'dir-zone') {
+                        const items = e.dataTransfer.items;
+                        const files = [];
+
+                        async function getAllFiles(entry) {
+                            return new Promise((resolve) => {
+                                if (entry.isFile) {
+                                    entry.file(file => {
+                                        // Store the full path without the root folder name
+                                        const pathParts = entry.fullPath.split(
+                                            '/');
+                                        file.webkitRelativePath = pathParts
+                                            .slice(2).join('/') || file.name;
+                                        files.push(file);
+                                        resolve();
+                                    });
+                                } else if (entry.isDirectory) {
+                                    const reader = entry.createReader();
+                                    reader.readEntries(async (entries) => {
+                                        const promises = entries.map(
+                                            entry => getAllFiles(entry));
+                                        await Promise.all(promises);
+                                        resolve();
+                                    });
+                                } else {
+                                    resolve();
+                                }
+                            });
+                        }
+
+                        const promises = [];
+                        for (const item of items) {
+                            if (item.kind === 'file') {
+                                const entry = item.webkitGetAsEntry();
+                                if (entry) {
+                                    promises.push(getAllFiles(entry));
+                                }
+                            }
+                        }
+
+                        await Promise.all(promises);
+
+                        if (files.length > 0) {
+                            handleDirectory(files);
+                        }
+                    }
+                });
+            });
         }
-    }
-}
 
-function displayManifest(manifest) {
-    try {
-        window.currentManifest = manifest;
-        document.getElementById('mismatch-list').innerHTML = '';
-        document.getElementById('mismatches').classList.add('hidden');
-        
-        document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
-        document.getElementById('depot-id').textContent = manifest.DepotID;
-        document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
-        document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
-        
-        const filteredFiles = manifest.Files.filter(file => !utils.isNonEmptyFolder(file, manifest.Files));
-        
-        const fileList = document.getElementById('file-list');
-        fileList.innerHTML = '';
-        filteredFiles.forEach(file => {
-            const row = document.createElement('tr');
-            const isFolder = utils.isFolder(file.FileHash);
-            row.innerHTML = `
-                <td>${file.FileName}</td>
-                <td>${isFolder ? 'Folder' : utils.formatSize(file.TotalSize)}</td>
-                <td class="file-hash">${isFolder ? 'Folder' : (manifest.isSHA1File ? file.FileHash : utils.formatHash(file.FileHash))}</td>
-                <td class="status ${isFolder ? 'folder' : 'pending'}">
-                    <span class="material-icons">${isFolder ? 'folder' : 'pending'}</span>
-                    ${isFolder ? 'Folder' : 'pending'}
-                </td>
-            `;
-            fileList.appendChild(row);
-        });
-        
-        const nonFolderFiles = filteredFiles.filter(file => !utils.isFolder(file.FileHash));
-        document.getElementById('total-files').textContent = nonFolderFiles.length;
-        document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum, file) => sum + Number(file.TotalSize), 0));
-        utils.updateStatus(document.getElementById('completion-status'), 'pending');
-        document.getElementById('metadata').classList.remove('hidden');
-        document.getElementById('files').classList.remove('hidden');
-        utils.hideError();
-    } catch (err) {
-        console.error('Error:', err);
-        utils.showError(err.message);
-    }
-}
-
-function initializeUI() {
-    document.getElementById('file-input').addEventListener('change', (e) => {
-        if (e.target.files[0]) handleManfiestFile(e.target.files[0]);
-    });
-    
-    document.getElementById('dir-input').addEventListener('change', (e) => {
-        if (e.target.files.length) handleDirectory(Array.from(e.target.files));
-    });
-    
-    ['drop-zone', 'dir-zone'].forEach(id => {
-        const element = document.getElementById(id);
-        element.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            element.classList.add('drag-over');
-        });
-        element.addEventListener('dragleave', () => {
-            element.classList.remove('drag-over');
-        });
-        element.addEventListener('drop', (e) => {
-            e.preventDefault();
-            element.classList.remove('drag-over');
-            if (id === 'drop-zone' && e.dataTransfer.files[0]) {
-                handleManfiestFile(e.dataTransfer.files[0]);
-            } else if (id === 'dir-zone' && e.dataTransfer.files.length) {
-                handleDirectory(Array.from(e.dataTransfer.files));
-            }
-        });
-    });
-    
-    document.getElementById('search').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('#file-list tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-        });
-    });
-}
-
-// Initialize the application
-initializeUI();
+        // Start the application
+        initializeUI();
     </script>
-  </body>
-</html>	  
+</body>
+
+</html>
