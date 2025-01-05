@@ -20,6 +20,7 @@ This project was developed with partial assistance from Claude, an AI language m
 - Works with both Steam manifest files and SHA1 files
 - Search function to find specific files
 - Works directly in your browser - no installation needed
+- Depot Name Lookup
 
 ## How to Use
 1. Open the tool in your web browser
@@ -34,7 +35,7 @@ This project was developed with partial assistance from Claude, an AI language m
 
 ## Requirements
 - A modern web browser (Chrome, Firefox, Edge, or Safari)
-- Internet connection for first-time use
+- Internet connection
 - JavaScript enabled in your browser
 
 ## Browser Support
