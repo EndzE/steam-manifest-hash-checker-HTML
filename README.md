@@ -5,7 +5,7 @@ The Steam Manifest Hash Checker is a simple, user-friendly tool that helps you v
 
 ## Acknowledgments
 - SteamKit2 code for reference implementation
-- anadius for performance improvements
+- anadius for suggesting hash-wasm
 - Masquerade for the original idea and testing
 
 ## AI Attribution Notice
