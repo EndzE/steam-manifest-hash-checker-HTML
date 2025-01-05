@@ -1,4 +1,4 @@
-# Steam Manifest Hash Checker
+# Steam Manifest Hash Checker HTML
 
 ## Overview
 The Steam Manifest Hash Checker is a simple, user-friendly tool that helps you verify your Steam game files. If you've ever wondered whether your game files are intact or need repair, this tool can help you check them against Steam's official data.
