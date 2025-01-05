@@ -454,12 +454,12 @@
                     <td id="total-files"></td>
                 </tr>
                 <tr>
-                    <td>Total Size:</td>
-                    <td id="total-size"></td>
-                </tr>
-                <tr>
                     <td>Status:</td>
                     <td id="completion-status">Not Started</td>
+                </tr>
+                <tr>
+                    <td>Total Size:</td>
+                    <td id="total-size"></td>
                 </tr>
             </table>
         </div>
@@ -797,7 +797,7 @@
                 element.className = `status ${status}`;
             }
         };
- // Steam Manifest Parser Class
+        // Steam Manifest Parser Class
         class Manifest {
             static PAYLOAD_MAGIC = 0x71F617D0;
             static METADATA_MAGIC = 0x1F4812BE;
@@ -1028,15 +1028,16 @@
             }
             utils.updateStatus(document.getElementById('completion-status'), statusType);
         }
-        async function displayManifest(manifest) {
-    try {
-        window.currentManifest = manifest;
-        document.getElementById('mismatch-list').innerHTML = '';
-        document.getElementById('mismatches').classList.add('hidden');
-        document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
-        document.getElementById('depot-id').textContent = manifest.DepotID;
-        document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
-        document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+        function displayManifest(manifest) {
+            try {
+            window.currentManifest = manifest;
+            document.getElementById('mismatch-list').innerHTML = '';
+            document.getElementById('mismatches').classList.add('hidden');
+            document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
+            document.getElementById('depot-id').textContent = manifest.DepotID;
+            document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
+            document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+
         // Get the current state of the folder toggle
         const hideFolders = localStorage.getItem('hideFolders') === 'true';
         
@@ -1078,7 +1079,7 @@
         utils.showError(err.message);
     }
 }
-function initThemes() {
+    function initThemes() {
         const themeSelect = document.getElementById('theme-select');
         const savedTheme = localStorage.getItem('theme') || 'steam'; // Default to steam theme
     
