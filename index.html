@@ -803,59 +803,79 @@
         };
         // Depot Manager for handling depot.ini lookups
         const DepotManager = {
-            depotData: null,
-        lastFetch: 0,
-        CACHE_DURATION: 3600000, // 1 hour
-        PRIMARY_URL: 'https://raw.githubusercontent.com/KingCatto/depot-names-Morrenus/refs/heads/main/depots.ini',
-        BACKUP_URL: 'https://raw.githubusercontent.com/Masquerade64/SteamDepotNames/refs/heads/main/depots.ini',
+    depotData: null,
+    lastFetch: 0,
+    CACHE_DURATION: 3600000, // 1 hour
+    PRIMARY_URL: 'https://raw.githubusercontent.com/Masquerade64/SteamDepotNames/refs/heads/main/depots.ini',
+    BACKUP_URL: 'https://raw.githubusercontent.com/SteamDatabase/SteamTracking/master/depots.ini',
     
     async fetchAndParseDepots() {
+        let depots = {};
+        
+        // Try primary URL first
         try {
+            console.log('Trying primary URL...');
             const response = await fetch(this.PRIMARY_URL);
-            if (!response.ok) throw new Error('Failed to fetch primary depots.ini');
-            
-            const text = await response.text();
-            const depots = {};
-            
-            text.split('\n').forEach(line => {
-                line = line.trim();
-                if (!line || line === '[depots]' || line.startsWith(';')) return;
-                
-                const match = line.match(/^(\d+)\s*=\s*(.+)$/);
-                if (match) {
-                    const [, id, name] = match;
-                    depots[id] = name.trim();
-                }
-            });
-            
-            this.depotData = depots;
-            this.lastFetch = Date.now();
-            return depots;
-        } catch {
-            // Try backup URL if primary fails
-            const response = await fetch(this.BACKUP_URL);
-            if (!response.ok) throw new Error('Failed to fetch both primary and backup depots.ini');
-            
-            const text = await response.text();
-            return this.parseDepotsData(text);
+            if (response.ok) {
+                const text = await response.text();
+                depots = { ...depots, ...this.parseDepotsData(text, true) };
+                console.log('Primary URL data loaded');
+            }
+        } catch (error) {
+            console.log('Primary URL failed:', error);
         }
+
+        // Always try backup URL
+        try {
+            console.log('Trying backup URL...');
+            const response = await fetch(this.BACKUP_URL);
+            if (response.ok) {
+                const text = await response.text();
+                // Merge with primary data, but don't overwrite existing names
+                const backupDepots = this.parseDepotsData(text, false);
+                Object.keys(backupDepots).forEach(id => {
+                    if (!depots[id]) {
+                        depots[id] = backupDepots[id];
+                    }
+                });
+                console.log('Backup URL data loaded');
+            }
+        } catch (error) {
+            console.log('Backup URL failed:', error);
+        }
+
+        if (Object.keys(depots).length === 0) {
+            throw new Error('Failed to fetch depot data from both sources');
+        }
+
+        this.depotData = depots;
+        this.lastFetch = Date.now();
+        return depots;
     },
 
-    parseDepotsData(text) {
-            const depots = {};
-            text.split('\n').forEach(line => {
+    parseDepotsData(text, isPrimary) {
+        const depots = {};
+        text.split('\n').forEach(line => {
             line = line.trim();
-            if (!line || line === '[depots]' || line.startsWith(';')) return;
+            if (!line || line.startsWith(';')) return;
             
             const match = line.match(/^(\d+)\s*=\s*(.+)$/);
             if (match) {
                 const [, id, name] = match;
-                depots[id] = name.trim();
+                if (isPrimary) {
+                    // Primary format: just store as-is
+                    depots[id] = name.trim();
+                } else {
+                    // Backup format: clean up the name
+                    let cleanName = name.trim()
+                        .replace(/(?:content|bin)\w*/gi, '')
+                        .replace(/german|french|italian|korean|spanish|russian|japanese|polish|brazilian|tchinese|schinese/gi, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    depots[id] = cleanName;
+                }
             }
         });
-        
-        this.depotData = depots;
-        this.lastFetch = Date.now();
         return depots;
     },
 
@@ -864,15 +884,9 @@
             await this.fetchAndParseDepots();
         }
 
-        let name = this.depotData[depotId];
-        if (!name) return null;
-
-        return name.replace(/(?:content|bin)\w*/gi, '')
-                  .replace(/german|french|italian|korean|spanish|russian|japanese|polish|brazilian|tchinese|schinese/gi, '')
-                  .replace(/\s+/g, ' ')
-                  .trim();
+        return this.depotData[depotId] || null;
     }
-};
+    };
 // Steam Manifest Parser Class
         class Manifest {
             static PAYLOAD_MAGIC = 0x71F617D0;
