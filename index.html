@@ -438,6 +438,10 @@
                     <td id="file-type"></td>
                 </tr>
                 <tr>
+                    <td>Name:</td>
+                    <td id="depot-name"></td>
+                </tr>
+                <tr>
                     <td>Depot ID:</td>
                     <td id="depot-id"></td>
                 </tr>
@@ -454,12 +458,12 @@
                     <td id="total-files"></td>
                 </tr>
                 <tr>
-                    <td>Status:</td>
-                    <td id="completion-status">Not Started</td>
-                </tr>
-                <tr>
                     <td>Total Size:</td>
                     <td id="total-size"></td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td id="completion-status">Not Started</td>
                 </tr>
             </table>
         </div>
@@ -797,7 +801,79 @@
                 element.className = `status ${status}`;
             }
         };
-        // Steam Manifest Parser Class
+        // Depot Manager for handling depot.ini lookups
+        const DepotManager = {
+            depotData: null,
+        lastFetch: 0,
+        CACHE_DURATION: 3600000, // 1 hour
+        PRIMARY_URL: 'https://raw.githubusercontent.com/Masquerade64/SteamDepotNames/refs/heads/main/depots.ini',
+        BACKUP_URL: 'https://raw.githubusercontent.com/SteamDatabase/SteamTracking/master/depots.ini',
+    
+    async fetchAndParseDepots() {
+        try {
+            const response = await fetch(this.PRIMARY_URL);
+            if (!response.ok) throw new Error('Failed to fetch primary depots.ini');
+            
+            const text = await response.text();
+            const depots = {};
+            
+            text.split('\n').forEach(line => {
+                line = line.trim();
+                if (!line || line === '[depots]' || line.startsWith(';')) return;
+                
+                const match = line.match(/^(\d+)\s*=\s*(.+)$/);
+                if (match) {
+                    const [, id, name] = match;
+                    depots[id] = name.trim();
+                }
+            });
+            
+            this.depotData = depots;
+            this.lastFetch = Date.now();
+            return depots;
+        } catch {
+            // Try backup URL if primary fails
+            const response = await fetch(this.BACKUP_URL);
+            if (!response.ok) throw new Error('Failed to fetch both primary and backup depots.ini');
+            
+            const text = await response.text();
+            return this.parseDepotsData(text);
+        }
+    },
+
+    parseDepotsData(text) {
+            const depots = {};
+            text.split('\n').forEach(line => {
+            line = line.trim();
+            if (!line || line === '[depots]' || line.startsWith(';')) return;
+            
+            const match = line.match(/^(\d+)\s*=\s*(.+)$/);
+            if (match) {
+                const [, id, name] = match;
+                depots[id] = name.trim();
+            }
+        });
+        
+        this.depotData = depots;
+        this.lastFetch = Date.now();
+        return depots;
+    },
+
+    async getDepotName(depotId) {
+        if (!this.depotData || Date.now() - this.lastFetch > this.CACHE_DURATION) {
+            await this.fetchAndParseDepots();
+        }
+
+        let name = this.depotData[depotId];
+        if (!name) return null;
+
+        return name.replace(/(?:content|bin)\w*/gi, '')
+                  .replace(/german|french|italian|korean|spanish|russian|japanese|polish|brazilian|tchinese|schinese/gi, '')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+    }
+};
+// Steam Manifest Parser Class
         class Manifest {
             static PAYLOAD_MAGIC = 0x71F617D0;
             static METADATA_MAGIC = 0x1F4812BE;
@@ -1028,15 +1104,51 @@
             }
             utils.updateStatus(document.getElementById('completion-status'), statusType);
         }
-        function displayManifest(manifest) {
-            try {
-            window.currentManifest = manifest;
-            document.getElementById('mismatch-list').innerHTML = '';
-            document.getElementById('mismatches').classList.add('hidden');
-            document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
-            document.getElementById('depot-id').textContent = manifest.DepotID;
-            document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
-            document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+        async function displayManifest(manifest) {
+    try {
+        window.currentManifest = manifest;
+        document.getElementById('mismatch-list').innerHTML = '';
+        document.getElementById('mismatches').classList.add('hidden');
+        document.getElementById('file-type').textContent = manifest.isSHA1File ? 'SHA1 File' : 'Steam Manifest';
+        document.getElementById('depot-id').textContent = manifest.DepotID;
+        document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
+        document.getElementById('creation-time').textContent = utils.formatDate(manifest.CreationTime);
+
+        // Add depot name lookup
+        try {
+            console.log('Fetching depot name for ID:', manifest.DepotID);
+            // Remove existing depot name row if it exists
+            const existingDepotName = document.getElementById('depot-name');
+            if (existingDepotName && existingDepotName.parentElement) {
+                existingDepotName.parentElement.remove();
+            }
+            
+            if (!manifest.isSHA1File && manifest.DepotID) {
+                const depotName = await DepotManager.getDepotName(manifest.DepotID.toString());
+                console.log('Fetched depot name:', depotName);
+                
+                if (depotName) {
+                    const depotIdRow = document.getElementById('depot-id').parentElement;
+                    if (depotIdRow && depotIdRow.parentNode) {
+                        const depotNameRow = document.createElement('tr');
+                        depotNameRow.innerHTML = `
+                            <td>Depot Name:</td>
+                            <td id="depot-name">${depotName}</td>
+                        `;
+                        depotIdRow.parentNode.insertBefore(depotNameRow, depotIdRow.nextSibling);
+                        console.log('Added depot name row to UI');
+                    } else {
+                        console.error('Could not find depot-id row or its parent');
+                    }
+                } else {
+                    console.log('No depot name found for ID:', manifest.DepotID);
+                }
+            } else {
+                console.log('Skipping depot name lookup for SHA1 file or invalid depot ID');
+            }
+        } catch (error) {
+            console.error('Error handling depot name:', error);
+        }
 
         // Get the current state of the folder toggle
         const hideFolders = localStorage.getItem('hideFolders') === 'true';
@@ -1079,7 +1191,7 @@
         utils.showError(err.message);
     }
 }
-    function initThemes() {
+function initThemes() {
         const themeSelect = document.getElementById('theme-select');
         const savedTheme = localStorage.getItem('theme') || 'steam'; // Default to steam theme
     
