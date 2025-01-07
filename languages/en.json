@@ -1,0 +1,84 @@
+{
+    "app": {
+        "title": "Steam Manifest/SHA1 Checker",
+        "themes": {
+            "dark": "Dark Theme",
+            "blue": "Blue Theme",
+            "light": "Light Theme",
+            "steam": "Steam Theme",
+            "synthwave": "Synthwave Theme",
+            "ocean": "Ocean Theme",
+            "forest": "Forest Theme",
+            "solarized": "Solarized Theme"
+        },
+        "folderToggle": {
+            "hide": "Hide Folders",
+            "show": "Show Folders"
+        }
+    },
+    "dropzones": {
+        "manifest": "Drop Steam manifest or SHA1 file here",
+        "folder": "Drop folder to verify here"
+    },
+    "fileInfo": {
+        "title": "File Info",
+        "type": "Type",
+        "depotId": "Depot ID",
+        "manifestId": "Manifest ID",
+        "creationDate": "Creation Date",
+        "totalFiles": "Total Files",
+        "status": "Status",
+        "totalSize": "Total Size",
+        "types": {
+            "steam": "Steam Manifest",
+            "sha1": "SHA1 File"
+        }
+    },
+    "mismatches": {
+        "title": "Mismatched Files",
+        "columns": {
+            "filename": "Filename",
+            "size": "Size",
+            "expectedHash": "Expected Hash",
+            "actualHash": "Actual Hash"
+        }
+    },
+    "files": {
+        "title": "Files",
+        "columns": {
+            "filename": "Filename",
+            "size": "Size",
+            "hash": "Hash",
+            "status": "Status"
+        }
+    },
+    "status": {
+        "match": "Match",
+        "mismatch": "Mismatch",
+        "pending": "Pending",
+        "folder": "Folder",
+        "notStarted": "Not Started"
+    },
+    "progress": {
+        "matched": "Matched",
+        "speed": "Speed",
+        "mbps": "MB/s"
+    },
+    "errors": {
+        "loadManifest": "Load manifest or SHA1 file first",
+        "noFiles": "No files selected",
+        "invalidFormat": "Invalid file format:",
+        "noValidHashes": "No valid SHA1 hashes found in file",
+        "fileMissing": "File Missing",
+        "loadingError": "Error loading file:",
+        "processingError": "Error processing file:"
+    },
+    "ui": {
+        "loading": "Loading...",
+        "processing": "Processing...",
+        "folder": "Folder",
+        "close": "Close",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+    }
+}
