@@ -20,7 +20,7 @@ This project was developed with partial assistance from Claude, an AI language m
 - Works with both Steam manifest files and SHA1 files
 - Search function to find specific files
 - Works directly in your browser - no installation needed
-
+- Multi-Language support. No need to download the Languages
 ## How to Use
 1. Open the tool in your web browser
 2. Drop your Steam manifest or SHA1 file into the left drop zone
@@ -51,10 +51,6 @@ Planned enhancements for the tool include:
 - Nothing currently in active development
 
 ### Planned Features
-- Multi-language Support
-  - Support for multiple languages through external translation files
-  - User-selectable language preference
-  - Persistent language settings
 - Batch Processing
   - Ability to check multiple folders at once
   - Queue system for large verifications
