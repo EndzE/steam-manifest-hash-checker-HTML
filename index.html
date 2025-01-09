@@ -815,7 +815,7 @@
                     [value, valueLen] = this.parseVarint(bytes, offset);
                     const strLen = Number(value);
                     value = bytes.slice(offset + valueLen, offset + valueLen + strLen);
-                    valueLen += strvalueLen += strLen;
+                    valueLen += strLen;
                 }
                 return {
                     fieldNum,
