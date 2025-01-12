@@ -104,6 +104,7 @@ If you encounter issues, please report them with:
 - Description of the problem
 - Any error messages you see
 - Steps to reproduce the issue
+- Join this discord https://discord.gg/ByCS43XMve 
 
 ## License
 Available for personal use. Please check licensing for commercial applications.
