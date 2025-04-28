@@ -1,0 +1,86 @@
+{
+    "app": {
+        "title": "Steam Manifest/SHA-1 Шашка",
+        "themes": {
+            "dark": "Dark Theme",
+            "blue": "Blue Theme",
+            "light": "Light Theme",
+            "steam": "Steam Theme",
+            "synthwave": "Synthwave Theme",
+            "ocean": "Ocean Theme",
+            "forest": "Forest Theme",
+            "solarized": "Solarized Theme"
+        },
+        "folderToggle": {
+            "hide": "Скрыть папки",
+            "show": "Показать папки"
+        }
+    },
+    "dropzones": {
+        "manifest": "Отбросьте Steam Manifest или файл SHA-1 сюда",
+        "folder": "Отбросьте папку для проверки здесь"
+    },
+    "fileInfo": {
+        "title": "Информация о файле",
+        "type": "Тип",
+        "//comment":"ID депо",
+        "depotId": "Depot ID",
+        "//comment":"ID манифеста",
+        "manifestId": "Manifest ID",
+        "creationDate": "Дата создания",
+        "totalFiles": "Всего файлов",
+        "status": "Статус",
+        "totalSize": "Общий размер",
+        "types": {
+            "steam": "Steam Manifest",
+            "sha1": "SHA-1 Файл"
+        }
+    },
+    "mismatches": {
+        "title": "Несоответствие файлов",
+        "columns": {
+            "filename": "Имя файла",
+            "size": "Размер",
+            "expectedHash": "Ожидаемый Хеш",
+            "actualHash": "Фактический Хэш"
+        }
+    },
+    "files": {
+        "title": "Файлы",
+        "columns": {
+            "filename": "Имя файла",
+            "size": "Размер",
+            "hash": "Хеш",
+            "status": "Статус"
+        }
+    },
+    "status": {
+        "match": "Соответствовать",
+        "mismatch": "Несоответствие",
+        "pending": "Ожидаемый",
+        "folder": "Папка",
+        "notStarted": "Не начато"
+    },
+    "progress": {
+        "matched": "Соответствие",
+        "speed": "Скорость",
+        "mbps": "MB/s"
+    },
+    "errors": {
+        "loadManifest": "Сначала загрузите Manifest или файл SHA-1",
+        "noFiles": "Файлы не выбраны",
+        "invalidFormat": "Недопустимый формат файла:",
+        "noValidHashes": "В файле не найдено допустимых хэшей SHA-1",
+        "fileMissing": "Пропажа файла",
+        "loadingError": "Ошибка при загрузке файла:",
+        "processingError": "Ошибка обработки файла:"
+    },
+    "ui": {
+        "loading": "Загрузка...",
+        "processing": "Обработка...",
+        "folder": "Папка",
+        "close": "Закрыть",
+        "cancel": "Отменить",
+        "confirm": "Подтвердите"
+    }
+}

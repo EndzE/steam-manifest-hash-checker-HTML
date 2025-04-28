@@ -1,0 +1,86 @@
+{
+    "app": {
+        "title": "Steam Manifest/SHA-1チェッカー",
+        "themes": {
+            "dark": "Dark Theme",
+            "blue": "Blue Theme",
+            "light": "Light Theme",
+            "steam": "Steam Theme",
+            "synthwave": "Synthwave Theme",
+            "ocean": "Ocean Theme",
+            "forest": "Forest Theme",
+            "solarized": "Solarized Theme"
+        },
+        "folderToggle": {
+            "hide": "フォルダを隠す",
+            "show": "フォルダを表示"
+        }
+    },
+    "dropzones": {
+        "manifest": "Steam ManifestまたはSHA-1ファイルをここにドロップ",
+        "folder": "検証のためにフォルダをここにドラッグ＆ドロップ"
+    },
+    "fileInfo": {
+        "title": "ファイル情報",
+        "type": "タイプ",
+        "//comment":"デポID",
+        "depotId": "Depot ID",
+        "//comment":"マニフェストID",
+        "manifestId": "Manifest ID",
+        "creationDate": "作成年月日",
+        "totalFiles": "合計ファイル数",
+        "status": "ステータス",
+        "totalSize": "合計サイズ",
+        "types": {
+            "steam": "Steam Manifest",
+            "sha1": "SHA-1ファイル"
+        }
+    },
+    "mismatches": {
+        "title": "不一致のファイル",
+        "columns": {
+            "filename": "ファイル名",
+            "size": "サイズ",
+            "expectedHash": "期待されるSHA-1ハッシュ",
+            "actualHash": "実際のSHA-1ハッシュ"
+        }
+    },
+    "files": {
+        "title": "ファイル",
+        "columns": {
+            "filename": "ファイル名",
+            "size": "サイズ",
+            "hash": "ハッシュ",
+            "status": "ステータス"
+        }
+    },
+    "status": {
+        "match": "一致",
+        "mismatch": "不一致",
+        "pending": "申請中",
+        "folder": "フォルダ",
+        "notStarted": "未スタート"
+    },
+    "progress": {
+        "matched": "一致",
+        "speed": "スピード",
+        "mbps": "MB/s"
+    },
+    "errors": {
+        "loadManifest": "Steam ManifestまたはSHA-1ファイルを最初に読み込む",
+        "noFiles": "ファイルが選択されていない",
+        "invalidFormat": "無効なファイル形式です：",
+        "noValidHashes": "ファイルに有効なSHA-1ハッシュが見つかりません",
+        "fileMissing": "ファイルがありません",
+        "loadingError": "ファイルのロード中にエラーが発生しました：",
+        "processingError": "ファイルの処理中にエラーが発生しました："
+    },
+    "ui": {
+        "loading": "ローディング。。。",
+        "processing": "しょり。。。",
+        "folder": "フォルダ",
+        "close": "クローズ",
+        "cancel": "キャンセル",
+        "confirm": "コンファーム"
+    }
+}
