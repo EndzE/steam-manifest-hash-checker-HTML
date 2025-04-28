@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Steam Manifest/SHA1 Hash Checker</title>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <!-- Required external resources -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4.11.0/dist/sha1.umd.min.js"></script>
     <style>
@@ -25,6 +27,7 @@
             --error: #f44336;
             --warning: #ff9800;
         }
+
         :root[data-theme="blue"] {
             --bg: #1a1f2e;
             --text: #e0e6f2;
@@ -40,21 +43,23 @@
             --error: #f44336;
             --warning: #ff9800;
         }
+
         :root[data-theme="light"] {
-			--bg: #ffffff;
-			--text: #333333;
-			--border: #dddddd;
-			--hover: #f5f5f5;
-			--primary: #555555;
-			--primary-dark: #e0e0e0;
-			--primary-light: #666666;
-			--metallic: linear-gradient(145deg, #ffffff, #f8f8f8);
-			--metallic-hover: linear-gradient(145deg, #f8f8f8, #f0f0f0);
-			--accent: #555555;
-			--success: #4caf50;
-			--error: #f44336;
-			--warning: #ff9800;
-		}
+            --bg: #ffffff;
+            --text: #333333;
+            --border: #dddddd;
+            --hover: #f5f5f5;
+            --primary: #555555;
+            --primary-dark: #e0e0e0;
+            --primary-light: #666666;
+            --metallic: linear-gradient(145deg, #ffffff, #f8f8f8);
+            --metallic-hover: linear-gradient(145deg, #f8f8f8, #f0f0f0);
+            --accent: #555555;
+            --success: #4caf50;
+            --error: #f44336;
+            --warning: #ff9800;
+        }
+
         :root[data-theme="steam"] {
             --bg: #171a21;
             --text: #c6d4df;
@@ -70,66 +75,71 @@
             --error: #cc3d3d;
             --warning: #ffa500;
         }
+
         :root[data-theme="synthwave"] {
-			--bg: #1a1a2e;
-			--text: #ff9ecd;
-			--border: #342c56;
-			--hover: #261d47;
-			--primary: #f97bc1;
-			--primary-dark: #fc2fa2;
-			--primary-light: #ffb8e0;
-			--metallic: linear-gradient(145deg, #2d1f54, #1a1a2e);
-			--metallic-hover: linear-gradient(145deg, #342c56, #2d1f54);
-			--accent: #3bfff9;
-			--success: #72f1b8;
-			--error: #ff3d81;
-			--warning: #ffd319;
-		}
+            --bg: #1a1a2e;
+            --text: #ff9ecd;
+            --border: #342c56;
+            --hover: #261d47;
+            --primary: #f97bc1;
+            --primary-dark: #fc2fa2;
+            --primary-light: #ffb8e0;
+            --metallic: linear-gradient(145deg, #2d1f54, #1a1a2e);
+            --metallic-hover: linear-gradient(145deg, #342c56, #2d1f54);
+            --accent: #3bfff9;
+            --success: #72f1b8;
+            --error: #ff3d81;
+            --warning: #ffd319;
+        }
+
         :root[data-theme="ocean"] {
-			--bg: #0a192f;
-			--text: #8892b0;
-			--border: #1b3a57;
-			--hover: #172a45;
-			--primary: #64ffda;
-			--primary-dark: #48d6b5;
-			--primary-light: #7fffdf;
-			--metallic: linear-gradient(145deg, #1b3a57, #0a192f);
-			--metallic-hover: linear-gradient(145deg, #234668, #1b3a57);
-			--accent: #00b4d8;
-			--success: #2dd4bf;
-			--error: #ef476f;
-			--warning: #ffd60a;
-		}
+            --bg: #0a192f;
+            --text: #8892b0;
+            --border: #1b3a57;
+            --hover: #172a45;
+            --primary: #64ffda;
+            --primary-dark: #48d6b5;
+            --primary-light: #7fffdf;
+            --metallic: linear-gradient(145deg, #1b3a57, #0a192f);
+            --metallic-hover: linear-gradient(145deg, #234668, #1b3a57);
+            --accent: #00b4d8;
+            --success: #2dd4bf;
+            --error: #ef476f;
+            --warning: #ffd60a;
+        }
+
         :root[data-theme="forest"] {
-			--bg: #1b2717;
-			--text: #d8e2d5;
-			--border: #2d3f24;
-			--hover: #233019;
-			--primary: #90b474;
-			--primary-dark: #6a9547;
-			--primary-light: #b1cc9a;
-			--metallic: linear-gradient(145deg, #2d3f24, #1b2717);
-			--metallic-hover: linear-gradient(145deg, #34492a, #2d3f24);
-			--accent: #e9f5db;
-			--success: #77dd77;
-			--error: #ff6b6b;
-			--warning: #ffd93d;
-		}
+            --bg: #1b2717;
+            --text: #d8e2d5;
+            --border: #2d3f24;
+            --hover: #233019;
+            --primary: #90b474;
+            --primary-dark: #6a9547;
+            --primary-light: #b1cc9a;
+            --metallic: linear-gradient(145deg, #2d3f24, #1b2717);
+            --metallic-hover: linear-gradient(145deg, #34492a, #2d3f24);
+            --accent: #e9f5db;
+            --success: #77dd77;
+            --error: #ff6b6b;
+            --warning: #ffd93d;
+        }
+
         :root[data-theme="solarized"] {
-			--bg: #002b36;
-			--text: #839496;
-			--border: #073642;
-			--hover: #003847;
-			--primary: #2aa198;
-			--primary-dark: #1f7972;
-			--primary-light: #35c8bd;
-			--metallic: linear-gradient(145deg, #073642, #002b36);
-			--metallic-hover: linear-gradient(145deg, #0b4653, #073642);
-			--accent: #268bd2;
-			--success: #859900;
-			--error: #dc322f;
-			--warning: #b58900;
-		}
+            --bg: #002b36;
+            --text: #839496;
+            --border: #073642;
+            --hover: #003847;
+            --primary: #2aa198;
+            --primary-dark: #1f7972;
+            --primary-light: #35c8bd;
+            --metallic: linear-gradient(145deg, #073642, #002b36);
+            --metallic-hover: linear-gradient(145deg, #0b4653, #073642);
+            --accent: #268bd2;
+            --success: #859900;
+            --error: #dc322f;
+            --warning: #b58900;
+        }
+
         :root {
             --radius: 12px;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -167,8 +177,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         body {
@@ -179,6 +194,7 @@
             margin: 0;
             min-height: 100vh;
         }
+
         .container {
             max-width: 1920px;
             margin: 0 auto;
@@ -186,6 +202,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .header {
             background: var(--metallic);
             padding: 1.5rem 2rem;
@@ -193,11 +210,13 @@
             margin-bottom: 2rem;
             border-bottom: 1px solid var(--border);
         }
+
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
+
         .header h1 {
             margin: 0;
             font-size: 1.75rem;
@@ -207,14 +226,17 @@
             align-items: center;
             gap: 0.75rem;
         }
+
         .header-controls {
             display: flex;
             align-items: center;
             gap: 1rem;
         }
+
         .theme-toggle {
             position: relative;
         }
+
         .theme-toggle select {
             appearance: none;
             background: var(--metallic);
@@ -227,15 +249,18 @@
             font-family: inherit;
             font-size: 0.9rem;
         }
+
         .theme-toggle select:hover {
             background: var(--metallic-hover);
             border-color: var(--primary);
         }
+
         .theme-toggle select option {
             background: var(--bg);
             color: var(--text);
             padding: 0.5rem;
         }
+
         .theme-toggle::after {
             content: "palette";
             font-family: "Material Icons";
@@ -246,6 +271,7 @@
             pointer-events: none;
             color: var(--text);
         }
+
         .toggle-button {
             display: flex;
             align-items: center;
@@ -258,18 +284,22 @@
             cursor: pointer;
             transition: var(--transition);
         }
+
         .toggle-button:hover {
             background: var(--metallic-hover);
             border-color: var(--primary);
         }
+
         .toggle-button .material-icons {
             font-size: 1.25rem;
         }
+
         .dropzones {
             display: flex;
             gap: 1rem;
             margin-bottom: 2rem;
         }
+
         .dropzone {
             flex: 1;
             border: 2px dashed var(--primary);
@@ -286,6 +316,7 @@
             gap: 1rem;
             position: relative;
         }
+
         .dropzone input {
             position: absolute;
             top: 0;
@@ -295,11 +326,14 @@
             opacity: 0;
             cursor: pointer;
         }
-        .dropzone:hover, .dropzone.drag-over {
+
+        .dropzone:hover,
+        .dropzone.drag-over {
             background: var(--metallic-hover);
             border-color: var(--primary-light);
             transform: translateY(-2px);
         }
+
         .section {
             background: var(--metallic);
             border: 1px solid var(--border);
@@ -308,6 +342,7 @@
             margin-bottom: 1.5rem;
             box-shadow: var(--shadow);
         }
+
         .progress-container {
             margin: 1.5rem 0;
             background: var(--metallic);
@@ -315,6 +350,7 @@
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
+
         .progress-bar {
             width: 100%;
             height: 8px;
@@ -322,24 +358,28 @@
             border-radius: 4px;
             overflow: hidden;
         }
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
             width: 0;
             transition: width 0.3s ease;
         }
+
         .table-container {
             overflow-x: auto;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: rgba(42, 50, 66, 0.5);
         }
+
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             table-layout: auto;
         }
+
         th {
             position: sticky;
             top: 0;
@@ -351,19 +391,23 @@
             text-align: left;
             white-space: nowrap;
         }
+
         .language-selector select option {
             background: var(--bg);
             color: var(--text);
             padding: 0.5rem;
         }
+
         [data-theme="light"] .language-selector select option {
             background: #ffffff;
             color: #333333;
         }
+
         [data-theme="light"] th {
             color: #333333 !important;
             background: #e0e0e0;
         }
+
         [data-theme="light"] .dropzone {
             border-color: #555555;
             color: #333333;
@@ -372,36 +416,45 @@
         [data-theme="light"] .material-icons {
             color: #555555;
         }
+
         [data-theme="light"] .dropzone:hover,
         [data-theme="light"] .dropzone.drag-over {
             border-color: #333333;
             background: var(--hover);
         }
+
         td {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--border);
             white-space: nowrap;
         }
+
         .status {
             display: flex;
             align-items: center;
             gap: 0.25rem;
         }
+
         .match {
             color: var(--success);
         }
+
         .mismatch {
             color: var(--error);
         }
+
         .pending {
             color: var(--warning);
         }
+
         .folder {
             color: var(--accent);
         }
+
         .hidden {
             display: none !important;
         }
+
         .error {
             color: var(--error);
             background: rgba(244, 67, 54, 0.1);
@@ -413,13 +466,16 @@
             align-items: center;
             gap: 0.5rem;
         }
+
         @media (max-width: 768px) {
             .container {
                 padding: 0 1rem;
             }
+
             .dropzones {
                 flex-direction: column;
             }
+
             .dropzone {
                 padding: 1.5rem;
             }
@@ -461,6 +517,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="loading-overlay" class="loading-overlay hidden">
         <div class="loading-spinner"></div>
@@ -469,7 +526,8 @@
 
     <header class="header">
         <div class="header-content">
-            <h1><span class="material-icons">verified</span> <span data-lang="app.title">Steam Manifest/SHA1 Checker</span></h1>
+            <h1><span class="material-icons">verified</span> <span data-lang="app.title">Steam Manifest/SHA1
+                    Checker</span></h1>
             <div class="header-controls">
                 <div class="language-selector">
                     <!-- Language selector will be inserted here -->
@@ -675,8 +733,8 @@
             // Get a string by its path
             getString(path) {
                 if (!this.strings) return this.fallbackStrings[path] || path;
-                return path.split('.').reduce((obj, key) => obj?.[key], this.strings) || 
-                       this.fallbackStrings[path] || path;
+                return path.split('.').reduce((obj, key) => obj?.[key], this.strings) ||
+                    this.fallbackStrings[path] || path;
             }
 
             // Update UI with current language strings
@@ -702,8 +760,8 @@
                     <option value="es">Español</option>
                     <option value="de">Deutsch</option>
                     <option value="fr">Français</option>
-                    <option value="jp">Japanese</option>
-                    <option value="ru">Russian</option>
+                    <option value="jp">日本語</option>
+                    <option value="ru">Русский</option>
                 `;
                 select.value = this.currentLanguage;
 
@@ -966,7 +1024,7 @@
                 if (!window.currentManifest?.Files) return null;
                 const normalizedInput = this.normalizePath(fileName);
                 const files = window.currentManifest.Files;
-                
+
                 const exactMatch = files.find(f =>
                     this.normalizePath(f.FileName) === normalizedInput
                 );
@@ -988,12 +1046,12 @@
 
                 let bestMatch = null;
                 let bestScore = -1;
-                
+
                 for (const candidate of candidates) {
                     const manifestPath = this.normalizePath(candidate.FileName);
                     const manifestParts = manifestPath.split('/');
                     const manifestDirectory = manifestParts.slice(0, -1).join('/');
-                    
+
                     let score = 0;
                     if (manifestDirectory === inputDirectory) {
                         score = 1000;
@@ -1009,13 +1067,13 @@
                             }
                         }
                     }
-                    
+
                     if (score > bestScore) {
                         bestScore = score;
                         bestMatch = candidate;
                     }
                 }
-                
+
                 return bestScore >= 10 ? bestMatch : null;
             },
 
@@ -1023,11 +1081,11 @@
                 const lines = content.split(/[\r\n]+/).filter(line => line.trim());
                 const files = [];
                 const seenFiles = new Set();
-                
+
                 lines.forEach((line, index) => {
                     line = line.trim().replace(/^\uFEFF/, '');
                     if (!line || line.startsWith('#')) return;
-                    
+
                     try {
                         let hash, fileName;
                         let match = line.match(/([a-fA-F0-9]{40})\s+[*]?(.+)/i);
@@ -1046,7 +1104,7 @@
                                 }
                             }
                         }
-                        
+
                         if (hash && fileName) {
                             fileName = fileName.trim().replace(/\\/g, '/');
                             const fileKey = `${fileName}|${hash}`;
@@ -1094,7 +1152,7 @@
                     );
                     mismatchList.appendChild(mismatchRow);
                 });
-                
+
                 if (document.getElementById('mismatch-list').children.length > 0) {
                     document.getElementById('mismatches').classList.remove('hidden');
                 }
@@ -1123,7 +1181,7 @@
                     pending: 'pending',
                     folder: 'folder'
                 };
-                
+
                 const statusText = window.languageManager.getString(`status.${status}`);
                 element.innerHTML = `
                     <span class="material-icons">${icons[status]}</span>
@@ -1136,8 +1194,8 @@
         // Main Functions
         async function handleDirectory(files) {
             if (!files.length || !window.currentManifest) {
-                utils.showError(!window.currentManifest ? 
-                    window.languageManager.getString('errors.loadManifest') : 
+                utils.showError(!window.currentManifest ?
+                    window.languageManager.getString('errors.loadManifest') :
                     window.languageManager.getString('errors.noFiles'));
                 return;
             }
@@ -1196,7 +1254,7 @@
                     utils.hideError();
                     let uploadedManifest;
                     const content = new TextDecoder().decode(e.target.result);
-                    
+
                     if (file.name.toLowerCase().endsWith('.sha1') ||
                         file.type === 'text/plain' ||
                         content.includes('sha1') ||
@@ -1209,7 +1267,7 @@
                     } else {
                         uploadedManifest = await Manifest.fromBuffer(e.target.result);
                     }
-        displayManifest(uploadedManifest);
+                    displayManifest(uploadedManifest);
                 } catch (err) {
                     console.error('Error parsing file:', err);
                     utils.showError(window.languageManager.getString('errors.invalidFormat') + ' ' + err.message);
@@ -1221,13 +1279,13 @@
         function updateFileStatuses(hash, fileName) {
             const manifestFile = utils.findMatchingFile(fileName);
             if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
-            
+
             const expectedHash = window.currentManifest.isSHA1File ?
                 manifestFile.FileHash :
                 utils.formatHash(manifestFile.FileHash);
             const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
             const matchStatus = expectedHash.toLowerCase() === actualHash.toLowerCase() ? 'match' : 'mismatch';
-            
+
             document.querySelectorAll('#file-list tr').forEach(row => {
                 const rowFileName = row.children[0].textContent;
                 if (rowFileName === manifestFile.FileName) {
@@ -1253,7 +1311,7 @@
             const totalCheckableFiles = document.querySelectorAll('#file-list tr').length -
                 document.querySelectorAll('#file-list tr .status.folder').length;
             const mismatchedFiles = document.querySelectorAll('#file-list tr .status.mismatch').length;
-            
+
             let statusType = 'pending';
             if (completedFiles > 0) {
                 if (completedFiles === totalCheckableFiles) {
@@ -1270,9 +1328,9 @@
                 window.currentManifest = manifest;
                 document.getElementById('mismatch-list').innerHTML = '';
                 document.getElementById('mismatches').classList.add('hidden');
-                
-                document.getElementById('file-type').textContent = manifest.isSHA1File ? 
-                    window.languageManager.getString('fileInfo.types.sha1') : 
+
+                document.getElementById('file-type').textContent = manifest.isSHA1File ?
+                    window.languageManager.getString('fileInfo.types.sha1') :
                     window.languageManager.getString('fileInfo.types.steam');
                 document.getElementById('depot-id').textContent = manifest.DepotID;
                 document.getElementById('manifest-gid').textContent = manifest.ManifestGID?.toString();
@@ -1280,15 +1338,15 @@
 
                 // Get the current state of the folder toggle
                 const hideFolders = localStorage.getItem('hideFolders') === 'true';
-                
+
                 // Filter files based on the toggle state
-                const filteredFiles = manifest.Files.filter(file => 
+                const filteredFiles = manifest.Files.filter(file =>
                     hideFolders ? !utils.isFolder(file.FileHash) : true
                 );
-                
+
                 const fileList = document.getElementById('file-list');
                 fileList.innerHTML = '';
-                
+
                 filteredFiles.forEach(file => {
                     const row = document.createElement('tr');
                     const isFolder = utils.isFolder(file.FileHash);
@@ -1307,9 +1365,9 @@
                 // Only count non-folder files for the totals
                 const nonFolderFiles = manifest.Files.filter(file => !utils.isFolder(file.FileHash));
                 document.getElementById('total-files').textContent = nonFolderFiles.length;
-                document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum, file) => 
+                document.getElementById('total-size').textContent = utils.formatSize(nonFolderFiles.reduce((sum, file) =>
                     sum + Number(file.TotalSize), 0));
-                
+
                 utils.updateStatus(document.getElementById('completion-status'), 'pending');
                 document.getElementById('metadata').classList.remove('hidden');
                 document.getElementById('files').classList.remove('hidden');
@@ -1323,10 +1381,10 @@
         function initThemes() {
             const themeSelect = document.getElementById('theme-select');
             const savedTheme = localStorage.getItem('theme') || 'steam';
-            
+
             document.documentElement.setAttribute('data-theme', savedTheme);
             themeSelect.value = savedTheme;
-            
+
             themeSelect.addEventListener('change', (e) => {
                 const newTheme = e.target.value;
                 document.documentElement.setAttribute('data-theme', newTheme);
@@ -1347,15 +1405,15 @@
             // Initialize folder toggle
             const folderToggle = document.getElementById('folder-toggle');
             const folderToggleText = document.getElementById('folder-toggle-text');
-            
+
             let hideFolders = localStorage.getItem('hideFolders') === 'true';
             folderToggleText.textContent = window.languageManager.getString(`app.folderToggle.${hideFolders ? 'show' : 'hide'}`);
-            
+
             folderToggle.addEventListener('click', () => {
                 hideFolders = !hideFolders;
                 localStorage.setItem('hideFolders', hideFolders);
                 folderToggleText.textContent = window.languageManager.getString(`app.folderToggle.${hideFolders ? 'show' : 'hide'}`);
-                
+
                 if (window.currentManifest) {
                     displayManifest(window.currentManifest);
                 }
@@ -1364,7 +1422,7 @@
             // Initialize drag and drop for both zones
             ['drop-zone', 'dir-zone'].forEach(id => {
                 const element = document.getElementById(id);
-                
+
                 element.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1440,4 +1498,5 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>
