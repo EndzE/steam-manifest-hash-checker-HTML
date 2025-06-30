@@ -327,6 +327,25 @@
             cursor: pointer;
         }
 
+        .dropzone textarea {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: var(--metallic);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            resize: none;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.9rem;
+            z-index: 1;
+        }
+
+        .dropzone textarea::-webkit-scrollbar {
+            display: none;
+        }
+
         .dropzone:hover,
         .dropzone.drag-over {
             background: var(--metallic-hover);
@@ -530,7 +549,15 @@
                     Checker</span></h1>
             <div class="header-controls">
                 <div class="language-selector">
-                    <!-- Language selector will be inserted here -->
+                    <select id="language-select">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="jp">日本語</option>
+                        <option value="ru">Русский</option>
+                        <option value="zh">中文</option>
+                    </select>
                 </div>
                 <div class="theme-toggle">
                     <select id="theme-select">
@@ -546,7 +573,7 @@
                 </div>
                 <button id="folder-toggle" class="toggle-button">
                     <span class="material-icons">folder</span>
-                    <span id="folder-toggle-text">Hide Folders</span>
+                    <span id="folder-toggle-text" data-lang="app.folderToggle.hide">Hide Folders</span>
                 </button>
             </div>
         </div>
@@ -556,12 +583,14 @@
         <div class="dropzones">
             <div class="dropzone" id="drop-zone">
                 <span class="material-icons">upload_file</span>
-                Drop Steam manifest or SHA1 file here
+                <span data-lang="dropzones.manifest">Drop Steam manifest or SHA1 file here</span>
                 <input type="file" id="file-input">
+                <span data-lang="dropzones.orInput">Or enter SHA1 hashes into the textarea below</span>
+                <textarea id="raw-input" placeholder="SHA1 hashes here" data-lang-placeholder="dropzones.textareaPlaceholder"></textarea>
             </div>
             <div class="dropzone" id="dir-zone">
                 <span class="material-icons">folder_open</span>
-                Drop folder to verify here
+                <span data-lang="dropzones.folder">Drop folder to verify here</span>
                 <input type="file" id="dir-input" webkitdirectory directory>
             </div>
         </div>
@@ -574,35 +603,35 @@
         <div id="metadata" class="section hidden">
             <h2>
                 <span class="material-icons">info</span>
-                File Info
+                <span data-lang="fileInfo.title">File Info</span>
             </h2>
             <table>
                 <tr>
-                    <td>Type:</td>
+                    <td data-lang="fileInfo.type">Type:</td>
                     <td id="file-type"></td>
                 </tr>
                 <tr>
-                    <td>Depot ID:</td>
+                    <td data-lang="fileInfo.depotId">Depot ID:</td>
                     <td id="depot-id"></td>
                 </tr>
                 <tr>
-                    <td>Manifest ID:</td>
+                    <td data-lang="fileInfo.manifestId">Manifest ID:</td>
                     <td id="manifest-gid"></td>
                 </tr>
                 <tr>
-                    <td>Creation Date:</td>
+                    <td data-lang="fileInfo.creationDate">Creation Date:</td>
                     <td id="creation-time"></td>
                 </tr>
                 <tr>
-                    <td>Total Files:</td>
+                    <td data-lang="fileInfo.totalFiles">Total Files:</td>
                     <td id="total-files"></td>
                 </tr>
                 <tr>
-                    <td>Status:</td>
-                    <td id="completion-status">Not Started</td>
+                    <td data-lang="fileInfo.status">Status:</td>
+                    <td id="completion-status" data-lang="status.notStarted">Not Started</td>
                 </tr>
                 <tr>
-                    <td>Total Size:</td>
+                    <td data-lang="fileInfo.totalSize">Total Size:</td>
                     <td id="total-size"></td>
                 </tr>
             </table>
@@ -611,16 +640,16 @@
         <div id="mismatches" class="section hidden">
             <h2>
                 <span class="material-icons" style="color: var(--error);">warning</span>
-                Mismatched Files
+                <span data-lang="mismatches.title">Mismatched Files</span>
             </h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 40%">Filename</th>
-                            <th style="width: 10%">Size</th>
-                            <th style="width: 25%">Expected Hash</th>
-                            <th style="width: 25%">Actual Hash</th>
+                            <th style="width: 40%" data-lang="mismatches.columns.filename">Filename</th>
+                            <th style="width: 10%" data-lang="mismatches.columns.size">Size</th>
+                            <th style="width: 25%" data-lang="mismatches.columns.expectedHash">Expected Hash</th>
+                            <th style="width: 25%" data-lang="mismatches.columns.actualHash">Actual Hash</th>
                         </tr>
                     </thead>
                     <tbody id="mismatch-list"></tbody>
@@ -631,16 +660,16 @@
         <div id="files" class="section hidden">
             <h2>
                 <span class="material-icons">folder</span>
-                Files
+                <span data-lang="files.title">Files</span>
             </h2>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 40%">Filename</th>
-                            <th style="width: 10%">Size</th>
-                            <th style="width: 25%">Hash</th>
-                            <th style="width: 25%">Status</th>
+                            <th style="width: 40%" data-lang="files.columns.filename">Filename</th>
+                            <th style="width: 10%" data-lang="files.columns.size">Size</th>
+                            <th style="width: 25%" data-lang="files.columns.hash">Hash</th>
+                            <th style="width: 25%" data-lang="files.columns.status">Status</th>
                         </tr>
                     </thead>
                     <tbody id="file-list"></tbody>
@@ -678,7 +707,12 @@
         class LanguageManager {
             constructor(baseUrl) {
                 this.baseUrl = baseUrl;
-                this.currentLanguage = localStorage.getItem('language') || 'en';
+                this.currentLanguage = localStorage.getItem('language');
+                // Auto-select language from browser UI language if unset
+                if (!this.currentLanguage) {
+                    const supportedLanguages = Array.from(document.getElementById('language-select').options).map(o => o.value);
+                    this.currentLanguage = navigator.languages.map(l => l.substring(0, 2)).find(l => supportedLanguages.includes(l)) || 'en';
+                }
                 this.strings = null;
                 this.loadingPromise = null;
                 this.fallbackStrings = {
@@ -709,7 +743,7 @@
                     this.strings = this.fallbackStrings;
                 }
                 this.updateUI();
-                this.addLanguageSelector();
+                this.initLanguageSelector();
             }
 
             // Load language strings from URL
@@ -739,10 +773,19 @@
 
             // Update UI with current language strings
             updateUI() {
+                // Update title
+                document.title = this.getString('app.title');
+
                 // Update all elements with data-lang attribute
                 document.querySelectorAll('[data-lang]').forEach(element => {
                     const key = element.getAttribute('data-lang');
                     element.textContent = this.getString(key);
+                });
+
+                // data-lang-placeholder
+                document.querySelectorAll('[data-lang-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-lang-placeholder');
+                    element.setAttribute('placeholder', this.getString(key));
                 });
 
                 // If there's a manifest loaded, refresh it
@@ -752,21 +795,9 @@
             }
 
             // Add language selector to the UI
-            addLanguageSelector() {
-                const select = document.createElement('select');
-                select.id = 'language-select';
-                select.innerHTML = `
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="de">Deutsch</option>
-                    <option value="fr">Français</option>
-                    <option value="jp">日本語</option>
-                    <option value="ru">Русский</option>
-                `;
+            initLanguageSelector() {
+                const select = document.getElementById('language-select');
                 select.value = this.currentLanguage;
-
-                const container = document.querySelector('.language-selector');
-                container.appendChild(select);
 
                 select.addEventListener('change', (e) => {
                     this.loadLanguage(e.target.value).then(() => this.updateUI());
@@ -975,7 +1006,7 @@
         const utils = {
             formatSize(bytes) {
                 const units = ['B', 'KB', 'MB', 'GB'];
-                let value = bytes;
+                let value = Number(bytes);
                 let unit = 0;
                 while (value >= 1024 && unit < units.length - 1) {
                     value /= 1024;
@@ -1087,20 +1118,26 @@
                     if (!line || line.startsWith('#')) return;
 
                     try {
-                        let hash, fileName;
+                        let hash, fileName, fileSize;
                         let match = line.match(/([a-fA-F0-9]{40})\s+[*]?(.+)/i);
                         if (match) {
                             [, hash, fileName] = match;
                         } else {
-                            match = line.match(/SHA1\((.*?)\)[= ]+([a-fA-F0-9]{40})/i);
+                            match = line.match(/SHA1\((.+?)\)[= ]+([a-fA-F0-9]{40})/i);
                             if (match) {
                                 [, fileName, hash] = match;
                             } else {
-                                match = line.match(/([a-fA-F0-9]{40})/i);
+                                // SteamDB format
+                                match = line.match(/(.+?)\t([a-fA-F0-9*]{23})\t(\d+)/i);
                                 if (match) {
-                                    hash = match[1];
-                                    fileName = line.replace(hash, '').trim();
-                                    if (!fileName) fileName = `file_${index}`;
+                                    [, fileName, hash, fileSize] = match;
+                                } else {
+                                    match = line.match(/([a-fA-F0-9]{40})/i);
+                                    if (match) {
+                                        hash = match[1];
+                                        fileName = line.replace(hash, '').trim();
+                                        if (!fileName) fileName = `file_${index}`;
+                                    }
                                 }
                             }
                         }
@@ -1113,7 +1150,7 @@
                                 files.push({
                                     FileName: fileName,
                                     FileHash: hash.toLowerCase(),
-                                    TotalSize: 0
+                                    TotalSize: fileSize ? Number(fileSize) : 0
                                 });
                             }
                         }
@@ -1131,7 +1168,7 @@
                     DepotID: 'SHA1 File',
                     ManifestGID: 'N/A',
                     CreationTime: new Date(),
-                    TotalSize: 0,
+                    TotalSize: files.some(e => e.TotalSize > 0) ? files.reduce((a, c) => a.TotalSize + c.TotalSize) : 0,
                     isSHA1File: true
                 };
             },
@@ -1221,7 +1258,7 @@
                         if (chunkOffset === file.size) {
                             const relativePath = FileProcessor.getRelativePath(file);
                             console.log('Processing file:', relativePath);
-                            updateFileStatuses(sha1.digest(), relativePath);
+                            updateFileStatuses(sha1.digest(), file.size, relativePath);
                         }
 
                         const elapsed = (Date.now() - startTime) / 1000;
@@ -1248,20 +1285,23 @@
         }
 
         async function handleManifestFile(file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
+            const resolver = async (e = null) => {
                 try {
                     utils.hideError();
                     let uploadedManifest;
-                    const content = new TextDecoder().decode(e.target.result);
+                    const content = e === null ? file : new TextDecoder().decode(e.target.result);
 
-                    if (file.name.toLowerCase().endsWith('.sha1') ||
+                    if (e === null ||
+                        file.name.toLowerCase().endsWith('.sha1') ||
                         file.type === 'text/plain' ||
                         content.includes('sha1') ||
                         content.match(/[a-fA-F0-9]{40}/i)) {
                         try {
                             uploadedManifest = utils.parseSHA1File(content);
                         } catch (sha1Err) {
+                            if (e === null) {
+                                throw sha1Err;
+                            }
                             uploadedManifest = await Manifest.fromBuffer(e.target.result);
                         }
                     } else {
@@ -1273,10 +1313,17 @@
                     utils.showError(window.languageManager.getString('errors.invalidFormat') + ' ' + err.message);
                 }
             };
+
+            if (typeof file === "string") {
+                resolver();
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = resolver;
             reader.readAsArrayBuffer(file);
         }
 
-        function updateFileStatuses(hash, fileName) {
+        function updateFileStatuses(hash, fileSize, fileName) {
             const manifestFile = utils.findMatchingFile(fileName);
             if (!manifestFile || utils.isFolder(manifestFile.FileHash)) return;
 
@@ -1284,7 +1331,22 @@
                 manifestFile.FileHash :
                 utils.formatHash(manifestFile.FileHash);
             const actualHash = typeof hash === 'string' ? hash : utils.formatHash(hash);
-            const matchStatus = expectedHash.toLowerCase() === actualHash.toLowerCase() ? 'match' : 'mismatch';
+            const matchStatus = (() => {
+                // Check file size
+                if (manifestFile.TotalSize !== fileSize) {
+                    return 'mismatch';
+                }
+
+                // Check SHA1
+                const actualHashL = actualHash.toLowerCase();
+                if (expectedHash.includes('*')) {
+                    return expectedHash.substring(0, 10) === actualHashL.substring(0, 10) &&
+                        expectedHash.substring(13) === actualHashL.substring(actualHashL.length - 10) ? 'match' : 'mismatch';
+                } else {
+                    return expectedHash.toLowerCase() === actualHashL ? 'match' : 'mismatch';
+                }
+            })();
+            
 
             document.querySelectorAll('#file-list tr').forEach(row => {
                 const rowFileName = row.children[0].textContent;
@@ -1382,6 +1444,9 @@
             const themeSelect = document.getElementById('theme-select');
             const savedTheme = localStorage.getItem('theme') || 'steam';
 
+            for (const option of themeSelect.options) {
+                option.setAttribute('data-lang', `app.themes.${option.value}`);
+            };
             document.documentElement.setAttribute('data-theme', savedTheme);
             themeSelect.value = savedTheme;
 
@@ -1401,6 +1466,11 @@
             document.getElementById('dir-input').addEventListener('change', (e) => {
                 if (e.target.files.length) handleDirectory(Array.from(e.target.files));
             });
+
+            // Raw input handler
+            document.getElementById('raw-input').addEventListener('change', (e) => {
+                if (typeof e.target.value === 'string' && e.target.value !== '') handleManifestFile(e.target.value);
+            })
 
             // Initialize folder toggle
             const folderToggle = document.getElementById('folder-toggle');
@@ -1488,11 +1558,12 @@
 
         // Initialize and start the application
         async function init() {
+            initThemes();
+
             const languageManager = new LanguageManager('https://raw.githubusercontent.com/KingCatto/steam-manifest-hash-checker-HTML/main');
             await languageManager.init();
             window.languageManager = languageManager;
 
-            initThemes();
             initializeUI();
         }
         document.addEventListener('DOMContentLoaded', init);

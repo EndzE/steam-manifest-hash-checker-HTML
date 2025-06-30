@@ -18,6 +18,8 @@
     },
     "dropzones": {
         "manifest": "Отбросьте Steam Manifest или файл SHA-1 сюда",
+        "orInput": "Или введите хэш SHA1 в текстовую область ниже",
+        "textareaPlaceholder": "SHA1 хэши здесь",
         "folder": "Отбросьте папку для проверки здесь"
     },
     "fileInfo": {

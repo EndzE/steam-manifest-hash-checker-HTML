@@ -1,0 +1,86 @@
+{
+    "app": {
+        "title": "Steam Manifest/SHA1 校验器",
+        "themes": {
+            "dark": "暗黑主题",
+            "blue": "蓝色主题",
+            "light": "明亮主题",
+            "steam": "Steam 主题",
+            "synthwave": "合成波主题",
+            "ocean": "海洋主题",
+            "forest": "森林主题",
+            "solarized": "日晒主题"
+        },
+        "folderToggle": {
+            "hide": "隐藏文件夹",
+            "show": "显示文件夹"
+        }
+    },
+    "dropzones": {
+        "manifest": "拖拽 Steam manifest 或 SHA1 文件至此",
+        "orInput": "或在下方的文本框中输入 SHA1 文件内容",
+        "textareaPlaceholder": "在此输入 SHA1 文件内容",
+        "folder": "拖拽文件夹至此以开始校验"
+    },
+    "fileInfo": {
+        "title": "文件信息",
+        "type": "类型",
+        "depotId": "Depot ID",
+        "manifestId": "Manifest ID",
+        "creationDate": "创建日期",
+        "totalFiles": "文件个数",
+        "status": "状态",
+        "totalSize": "总大小",
+        "types": {
+            "steam": "Steam Manifest",
+            "sha1": "SHA1 文件"
+        }
+    },
+    "mismatches": {
+        "title": "不匹配的文件",
+        "columns": {
+            "filename": "文件名",
+            "size": "大小",
+            "expectedHash": "预期哈希值",
+            "actualHash": "实际哈希值"
+        }
+    },
+    "files": {
+        "title": "文件",
+        "columns": {
+            "filename": "文件名",
+            "size": "大小",
+            "hash": "哈希值",
+            "status": "状态"
+        }
+    },
+    "status": {
+        "match": "匹配",
+        "mismatch": "不匹配",
+        "pending": "等待验证",
+        "folder": "文件夹",
+        "notStarted": "未开始"
+    },
+    "progress": {
+        "matched": "匹配",
+        "speed": "处理速度",
+        "mbps": "MB/s"
+    },
+    "errors": {
+        "loadManifest": "请先上传 manifest 或 SHA1 文件",
+        "noFiles": "未选择文件",
+        "invalidFormat": "无效的文件格式:",
+        "noValidHashes": "未在文件中找到有效的 SHA1 哈希值",
+        "fileMissing": "找不到文件",
+        "loadingError": "加载文件时出错:",
+        "processingError": "处理文件时出错:"
+    },
+    "ui": {
+        "loading": "加载中...",
+        "processing": "处理中...",
+        "folder": "文件夹",
+        "close": "关闭",
+        "cancel": "取消",
+        "confirm": "确认"
+    }
+}

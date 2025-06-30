@@ -18,6 +18,8 @@
     },
     "dropzones": {
         "manifest": "Steam ManifestまたはSHA-1ファイルをここにドロップ",
+        "orInput": "または、以下のテキストエリアにSHA1ハッシュを入力してください",
+        "textareaPlaceholder": "SHA1ハッシュはこちら",
         "folder": "検証のためにフォルダをここにドラッグ＆ドロップ"
     },
     "fileInfo": {
@@ -76,8 +78,8 @@
         "processingError": "ファイルの処理中にエラーが発生しました："
     },
     "ui": {
-        "loading": "ローディング。。。",
-        "processing": "しょり。。。",
+        "loading": "ローディング...",
+        "processing": "しょり...",
         "folder": "フォルダ",
         "close": "クローズ",
         "cancel": "キャンセル",

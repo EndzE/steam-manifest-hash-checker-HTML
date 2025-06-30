@@ -18,6 +18,8 @@
     },
     "dropzones": {
         "manifest": "Steam-Manifest oder SHA1-Datei hier ablegen",
+        "orInput": "Oder geben Sie SHA1-Hashes in das folgende Textfeld ein",
+        "textareaPlaceholder": "SHA1-Hashes hier",
         "folder": "Ordner zum Verifizieren hier ablegen"
     },
     "fileInfo": {
