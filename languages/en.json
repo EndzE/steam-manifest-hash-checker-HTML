@@ -18,6 +18,8 @@
     },
     "dropzones": {
         "manifest": "Drop Steam manifest or SHA1 file here",
+        "orInput": "Or enter SHA1 hashes into the textarea below",
+        "textareaPlaceholder": "SHA1 hashes here",
         "folder": "Drop folder to verify here"
     },
     "fileInfo": {
