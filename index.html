@@ -10,6 +10,7 @@
         rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hash-wasm@4.11.0/dist/sha1.umd.min.js"></script>
+    <script src="crypto-js.js"></script>
     <style>
         :root[data-theme="dark"] {
             --bg: #121212;
@@ -529,6 +530,7 @@
                 <input type="file" id="dir-input" webkitdirectory directory>
             </div>
         </div>
+        <input type="text" id="keyInput" placeholder="Enter AES Key (hex)" style="width: 30%;"><br><br>
         <div id="error" class="error hidden">
             <span class="material-icons">error</span>
             <span class="error-message"></span>
@@ -627,6 +629,32 @@
             }
             hasMore() {
                 return this.offset < this.view.byteLength;
+            }
+        }
+        class FilenameDecryptor {
+            constructor(keyHex) {
+              this.key = CryptoJS.enc.Hex.parse(keyHex);
+            }
+
+            decrypt(base64) {
+              const data = CryptoJS.enc.Base64.parse(base64);
+
+              const ivEncrypted = CryptoJS.lib.WordArray.create(data.words.slice(0, 4));
+              const encryptedBody = CryptoJS.lib.WordArray.create(data.words.slice(4));
+
+              const iv = CryptoJS.AES.decrypt(
+                { ciphertext: ivEncrypted },
+                this.key,
+                { mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.NoPadding }
+              );
+
+              const decrypted = CryptoJS.AES.decrypt(
+                { ciphertext: encryptedBody },
+                this.key,
+                { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+              );
+
+              return decrypted.toString(CryptoJS.enc.Utf8).replace(/\x00+$/g, '');
             }
         }
         // Language Manager class
@@ -826,6 +854,8 @@
             }
             static parsePayload(data, manifest) {
                 let offset = 0;
+                const keyHex = document.getElementById("keyInput").value.trim();
+                const decryptor = new FilenameDecryptor(keyHex);
                 while (offset < data.length) {
                     const field = this.parseProtoField(data, offset);
                     offset += field.bytesRead;
@@ -842,7 +872,12 @@
                             mappingOffset += mappingField.bytesRead;
                             switch (mappingField.fieldNum) {
                                 case 1:
-                                    fileInfo.FileName = new TextDecoder().decode(mappingField.value);
+                                    if (!keyHex) {
+                                        fileInfo.FileName = new TextDecoder().decode(mappingField.value)
+                                    }
+                                    else {
+                                        fileInfo.FileName = decryptor.decrypt(new TextDecoder().decode(mappingField.value).replace(/[\r\n]+/g, ''));
+                                    }
                                     break;
                                 case 2:
                                     fileInfo.TotalSize = Number(mappingField.value);
